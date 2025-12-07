@@ -1,0 +1,1399 @@
+<?php
+include FRONTEND_TEMPLATE_PATH . "header.php";
+include FRONTEND_TEMPLATE_PATH . "navigation.php";
+?>
+
+<?php
+require_once __DIR__ . '/../../models/ProjectModel.php';
+require_once __DIR__ . '/../../models/CommentModel.php';
+
+$projectModel = new Project();
+$commentModel = new Comment();
+
+// Get project ID from GET  
+if (isset($_GET['id'])) {
+    $projectId = (int)$_GET['id'];
+    $project = $projectModel->getById($projectId);
+
+    if (!$project) {
+        $_SESSION['error'] = 'Project not found';
+        header('Location: /urls.php?pg=projects');
+        exit;
+    }
+} else {
+    $_SESSION['error'] = 'No Project ID provided';
+    header('Location: /urls.php?pg=projects');
+    exit;
+}
+
+require_once __DIR__ . "/../../models/ProjectViewModel.php";
+$viewModel = new ProjectView();
+$ipHash = hash("sha256", $_SERVER['REMOTE_ADDR'] . $_SERVER['HTTP_USER_AGENT']);
+$cookieName = "viewed_project_$projectId";
+
+if (!isset($_COOKIE[$cookieName])) {
+    setcookie($cookieName, '1', time() + 86400 * 30, '/');
+    if (!$viewModel->hasViewed($projectId, $ipHash)) {
+        $viewModel->addView($projectId, $ipHash);
+    }
+}
+
+// Get approved comments for this project
+$approvedComments = $commentModel->getApprovedByProject($projectId);
+$commentCount = count($approvedComments);
+
+// Prepare images for carousel  
+$images = [$project['image1'], $project['image2'], $project['image3']];
+$images = array_filter($images);
+?>
+
+<!-- AOS Animation Library -->
+<link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+
+<style>
+    /* Prevent horizontal scroll */
+    body {
+        overflow-x: hidden;
+        background: #f8f9fa;
+        padding-top: 0px;
+    }
+
+    /* Hero Section */
+    .project-hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        padding: 60px 0 60px 0;
+        position: relative;
+        overflow: hidden;
+        margin-top: 56px;
+    }
+
+    .project-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><rect width="2" height="2" fill="rgba(255,255,255,0.1)"/></svg>') repeat;
+        opacity: 0.3;
+    }
+
+    .project-hero .container {
+        position: relative;
+        z-index: 1;
+    }
+
+    .breadcrumb-custom {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        padding: 0.8rem 1.5rem;
+        border-radius: 50px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .breadcrumb-custom a {
+        color: #fff;
+        text-decoration: none;
+        transition: opacity 0.3s ease;
+    }
+
+    .breadcrumb-custom a:hover {
+        opacity: 0.8;
+    }
+
+    .breadcrumb-custom i {
+        font-size: 0.8rem;
+        opacity: 0.6;
+    }
+
+    .project-title {
+        font-size: 3rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        line-height: 1.2;
+    }
+
+    .project-status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        padding: 0.5rem 1.2rem;
+        border-radius: 50px;
+        font-weight: 600;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    /* Carousel Section */
+    .carousel-section {
+        margin-top: -40px;
+        position: relative;
+        z-index: 10;
+    }
+
+    .carousel-container {
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        background: #fff;
+    }
+
+    .carousel-inner {
+        border-radius: 20px;
+    }
+
+    .carousel-item img {
+        height: 600px;
+        object-fit: cover;
+        width: 100%;
+    }
+
+    .carousel-control-prev,
+    .carousel-control-next {
+        width: 60px;
+        height: 60px;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(10px);
+        border-radius: 50%;
+        top: 50%;
+        transform: translateY(-50%);
+        opacity: 0;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .carousel-container:hover .carousel-control-prev,
+    .carousel-container:hover .carousel-control-next {
+        opacity: 1;
+    }
+
+    .carousel-control-prev:hover,
+    .carousel-control-next:hover {
+        background: rgba(0, 0, 0, 0.9);
+        transform: translateY(-50%) scale(1.1);
+    }
+
+    .carousel-control-prev {
+        left: 20px;
+    }
+
+    .carousel-control-next {
+        right: 20px;
+    }
+
+    .carousel-indicators {
+        bottom: 20px;
+    }
+
+    .carousel-indicators button {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.5);
+        border: 2px solid #fff;
+        transition: all 0.3s ease;
+    }
+
+    .carousel-indicators button.active {
+        background: #fff;
+        transform: scale(1.2);
+    }
+
+    /* Content Section */
+    .content-section {
+        padding: 4rem 0;
+    }
+
+    .section-card {
+        background: #fff;
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: none;
+        margin-bottom: 2rem;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .section-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    .section-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+
+    .section-title i {
+        color: #667eea;
+        font-size: 1.5rem;
+    }
+
+    .description-text {
+        color: #475569;
+        font-size: 1.1rem;
+        line-height: 1.8;
+        text-align: justify;
+    }
+
+    /* Info Grid */
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .info-item {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 1.5rem;
+        border-radius: 15px;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+
+    .info-item:hover {
+        transform: translateY(-3px);
+        border-color: #667eea;
+        background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+    }
+
+    .info-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 0.8rem;
+        font-size: 0.95rem;
+    }
+
+    .info-label i {
+        color: #667eea;
+    }
+
+    .info-value {
+        color: #64748b;
+        font-size: 0.95rem;
+    }
+
+    .info-value a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.3s ease;
+        word-break: break-all;
+    }
+
+    .info-value a:hover {
+        color: #764ba2;
+        text-decoration: underline;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-top: 2rem;
+    }
+
+    .btn-action {
+        padding: 1rem 2rem;
+        border-radius: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.8rem;
+        transition: all 0.3s ease;
+        border: none;
+        font-size: 1rem;
+    }
+
+    .btn-primary-custom {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+    }
+
+    .btn-primary-custom:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        color: #fff;
+    }
+
+    .btn-secondary-custom {
+        background: #fff;
+        color: #667eea;
+        border: 2px solid #667eea;
+    }
+
+    .btn-secondary-custom:hover {
+        background: #667eea;
+        color: #fff;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-back {
+        background: #f8f9fa;
+        color: #475569;
+        border: 2px solid #e2e8f0;
+    }
+
+    .btn-back:hover {
+        background: #e2e8f0;
+        color: #1e293b;
+        transform: translateY(-3px);
+    }
+
+    /* Status Badge */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem 1.2rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .status-published {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: #fff;
+    }
+
+    .status-unpublished {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: #fff;
+    }
+
+    /* Empty State for Images */
+    .empty-image-state {
+        height: 500px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 20px;
+        color: #fff;
+    }
+
+    .empty-image-state i {
+        font-size: 6rem;
+        opacity: 0.5;
+    }
+
+    /* Comments Section Styles */
+    .comments-section {
+        padding: 3rem 0;
+        background: #f8f9fa;
+    }
+
+    .comment-form-card {
+        background: #fff;
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        margin-bottom: 2rem;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .comment-form-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    .comment-form-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+
+    .comment-form-title i {
+        color: #667eea;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+        display: block;
+        font-size: 0.95rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.875rem 1.25rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: #fff;
+        font-family: inherit;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .form-control.textarea {
+        resize: vertical;
+        min-height: 120px;
+    }
+
+    .char-counter {
+        font-size: 0.875rem;
+        color: #64748b;
+        text-align: right;
+        margin-top: 0.25rem;
+    }
+
+    .char-counter.warning {
+        color: #f59e0b;
+    }
+
+    .char-counter.danger {
+        color: #ef4444;
+    }
+
+    .honeypot {
+        position: absolute;
+        left: -9999px;
+        opacity: 0;
+        pointer-events: none;
+        height: 0;
+        width: 0;
+    }
+
+    .submit-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        padding: 1rem 2.5rem;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    .submit-btn:active {
+        transform: translateY(0);
+    }
+
+    .submit-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* Alert Messages */
+    .alert {
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        font-weight: 500;
+        animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .alert-success {
+        background: #d1fae5;
+        color: #065f46;
+        border-left: 4px solid #10b981;
+    }
+
+    .alert-danger {
+        background: #fee2e2;
+        color: #991b1b;
+        border-left: 4px solid #ef4444;
+    }
+
+    .alert i {
+        font-size: 1.25rem;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+    .alert ul {
+        margin: 0;
+        padding-left: 1.25rem;
+    }
+
+    .alert ul li {
+        margin-bottom: 0.25rem;
+    }
+
+    /* Comments List */
+    .comments-list-card {
+        background: #fff;
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .comments-list-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    .comments-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .comments-count {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #1e293b;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+
+    .comments-count i {
+        color: #667eea;
+    }
+
+    .count-badge {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        padding: 0.25rem 0.75rem;
+        border-radius: 50px;
+        font-size: 1rem;
+    }
+
+    .comment-item {
+        padding: 1.5rem;
+        background: #f8f9fa;
+        border-radius: 15px;
+        margin-bottom: 1.25rem;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+
+    .comment-item:hover {
+        background: #fff;
+        border-color: #e2e8f0;
+        transform: translateX(5px);
+    }
+
+    .comment-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .comment-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+
+    .comment-author {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .author-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-weight: 700;
+        font-size: 1.25rem;
+        flex-shrink: 0;
+    }
+
+    .author-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .author-name {
+        font-weight: 700;
+        color: #1e293b;
+        font-size: 1.1rem;
+    }
+
+    .comment-date {
+        font-size: 0.875rem;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .comment-content {
+        color: #475569;
+        line-height: 1.7;
+        font-size: 1rem;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+
+    .no-comments {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: #64748b;
+    }
+
+    .no-comments i {
+        font-size: 4rem;
+        color: #cbd5e1;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .no-comments p {
+        font-size: 1.1rem;
+        margin: 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .project-hero {
+            padding: 80px 0 40px 0;
+        }
+
+        .project-title {
+            font-size: 2rem;
+        }
+
+        .carousel-item img {
+            height: 300px;
+        }
+
+        .section-card,
+        .comment-form-card,
+        .comments-list-card {
+            padding: 1.5rem;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .btn-action {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .comments-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .comment-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .submit-btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .carousel-item img {
+            height: 250px;
+        }
+
+        .project-title {
+            font-size: 1.5rem;
+        }
+
+        .comment-form-title,
+        .comments-count {
+            font-size: 1.5rem;
+        }
+    }
+
+    .fade-in {
+        animation: fadeIn 0.4s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-5px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<!-- Hero Section -->
+<section class="project-hero">
+    <div class="container">
+        <!-- Project Title -->
+        <h1 class="project-title" data-aos="fade-up">
+            <?= htmlspecialchars($project['title']); ?>
+        </h1>
+
+        <!-- Status Badge -->
+        <div data-aos="fade-up" data-aos-delay="100">
+            <span class="status-badge <?= $project['is_published'] ? 'status-published' : 'status-unpublished'; ?>">
+                <i class="fas <?= $project['is_published'] ? 'fa-check-circle' : 'fa-clock-o'; ?>"></i>
+                <?= $project['is_published'] ? 'Live & Published' : 'In Development'; ?>
+            </span>
+        </div>
+    </div>
+</section>
+
+<!-- Carousel Section -->
+<section class="carousel-section">
+    <div class="container">
+        <?php if (!empty($images)) : ?>
+            <div class="carousel-container" data-aos="zoom-in" data-aos-delay="200">
+                <div id="projectCarousel" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-indicators">
+                        <?php foreach ($images as $index => $img) : ?>
+                            <button type="button"
+                                data-bs-target="#projectCarousel"
+                                data-bs-slide-to="<?= $index; ?>"
+                                class="<?= ($index === 0) ? 'active' : ''; ?>"
+                                aria-current="<?= ($index === 0) ? 'true' : 'false'; ?>"
+                                aria-label="Slide <?= $index + 1; ?>">
+                            </button>
+                        <?php endforeach; ?>
+                    </div>
+
+                    <div class="carousel-inner">
+                        <?php foreach ($images as $index => $img) : ?>
+                            <div class="carousel-item <?= ($index === 0) ? 'active' : ''; ?>">
+                                <img src="/media/projects/<?= htmlspecialchars($img); ?>"
+                                    class="d-block w-100"
+                                    alt="<?= htmlspecialchars($project['title']); ?> - Screenshot <?= $index + 1; ?>"
+                                    loading="lazy">
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+
+                    <?php if (count($images) > 1) : ?>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#projectCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#projectCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                    <?php endif; ?>
+                </div>
+            </div>
+        <?php else : ?>
+            <div class="empty-image-state" data-aos="zoom-in" data-aos-delay="200">
+                <i class="fas fa-image"></i>
+            </div>
+        <?php endif; ?>
+
+    </div>
+</section>
+
+<!-- Content Section -->
+<section class="content-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Description Card -->
+                <div class="section-card" data-aos="fade-up">
+                    <h2 class="section-title">
+                        <i class="fa fa-align-left"></i>
+                        Project Overview
+                    </h2>
+                    <div class="description-text">
+                        <?= nl2br(htmlspecialchars($project['description'])); ?>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons" data-aos="fade-up" data-aos-delay="100">
+                    <?php if ($project['live_url']) : ?>
+                        <a href="<?= htmlspecialchars($project['live_url']); ?>"
+                            target="_blank"
+                            class="btn-action btn-primary-custom">
+                            <i class="fa fa-external-link-alt"></i>
+                            View Live Project
+                        </a>
+                    <?php endif; ?>
+
+                    <?php if ($project['github_url']) : ?>
+                        <a href="<?= htmlspecialchars($project['github_url']); ?>"
+                            target="_blank"
+                            class="btn-action btn-secondary-custom">
+                            <i class="fab fa-github"></i>
+                            View on GitHub
+                        </a>
+                    <?php endif; ?>
+
+                    
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <!-- Project Info Card -->
+                <div class="section-card" data-aos="fade-up" data-aos-delay="200">
+                    <h2 class="section-title">
+                        <i class="fa fa-info-circle"></i>
+                        Project Info
+                    </h2>
+
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">
+                                <i class="fa fa-calendar-alt"></i>
+                                Created
+                            </div>
+                            <div class="info-value">
+                                <?= date('M d, Y', strtotime($project['created_at'])); ?>
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <div class="info-label">
+                                <i class="fa fa-clock"></i>
+                                Last Updated
+                            </div>
+                            <div class="info-value">
+                                <?= date('M d, Y', strtotime($project['updated_at'])); ?>
+                            </div>
+                        </div>
+
+                        <?php if ($project['live_url']) : ?>
+                            <div class="info-item">
+                                <div class="info-label">
+                                    <i class="fas fa-link"></i>
+                                    Live URL
+                                </div>
+                                <div class="info-value">
+                                    <a href="<?= htmlspecialchars($project['live_url']); ?>" target="_blank">
+                                        Visit Site
+                                    </a>
+                                </div>
+                            </div>
+
+
+                        <?php endif; ?>
+
+                        <?php if ($project['github_url']) : ?>
+                            <div class="info-item">
+                                <div class="info-label">
+                                    <i class="fab fa-github"></i>
+                                    Repository
+                                </div>
+                                <div class="info-value">
+                                    <a href="<?= htmlspecialchars($project['github_url']); ?>" target="_blank">
+                                        View Code
+                                    </a>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <a href="/urls.php?pg=projects" class="btn-action btn-back">
+                        <i class="fa fa-arrow-left"></i>
+                        Back to Projects
+                    </a>
+            </div>
+            
+        </div>
+    </div>
+</section>
+
+<!-- Comments Section -->
+<section class="comments-section" id="comments-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 offset-lg-2">
+
+                <!-- Comment Form -->
+                <div class="comment-form-card" data-aos="fade-up" id="comment-form">
+                    <h3 class="comment-form-title">
+                        <i class="fas fa-comment-dots"></i>
+                        Leave a Comment
+                    </h3>
+
+                    <!-- Alert Container (for AJAX feedback) -->
+                    <div id="alertContainer"></div>
+
+                    <form id="commentForm" action="/urls.php?pg=process_comments" method="POST" enctype="multipart/form-data" novalidate>
+                        <input type="hidden" name="project_id" value="<?= $projectId; ?>">
+
+                        <!-- Honeypot field for spam protection -->
+                        <div class="honeypot">
+                            <label for="website">Website</label>
+                            <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+                        </div>
+
+                        <!-- Name Field -->
+                        <div class="form-group">
+                            <label for="name" class="form-label">
+                                <i class="fas fa-user"></i>
+                                Name <span class="required">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                id="name"
+                                name="name"
+                                class="form-control"
+                                placeholder="Enter your name"
+                                maxlength="100"
+                                required
+                                value="<?= isset($_POST['name']) ? htmlspecialchars($_POST['name']) : ''; ?>">
+                            <div class="field-hint">
+                                <i class="fas fa-info-circle"></i>
+                                This will be displayed publicly
+                            </div>
+                        </div>
+
+                        <!-- Comment Content Field -->
+                        <div class="form-group">
+                            <label for="content" class="form-label">
+                                <i class="fas fa-comment"></i>
+                                Comment <span class="required">*</span>
+                            </label>
+                            <textarea
+                                id="content"
+                                name="content"
+                                class="form-control textarea"
+                                placeholder="Share your thoughts about this project..."
+                                minlength="10"
+                                maxlength="1000"
+                                required
+                                rows="5"><?= isset($_POST['content']) ? htmlspecialchars($_POST['content']) : ''; ?></textarea>
+                            <div class="field-footer">
+                                <div class="field-hint">
+                                    <i class="fas fa-lightbulb"></i>
+                                    Be respectful and constructive
+                                </div>
+                                <div class="char-counter" id="charCounter">
+                                    <span id="charCount">0</span> / 1000
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Info Notice -->
+                        <div class="info-notice">
+                            <i class="fas fa-shield-alt"></i>
+                            <div>
+                                <strong>Privacy Notice:</strong> Your comment will be reviewed before being published.
+                                We respect your privacy and will never share your information.
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" name="submit_comment" class="submit-btn" id="submitBtn">
+                            <i class="fas fa-paper-plane"></i>
+                            <span>Submit Comment</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Comments List -->
+                <div class="comments-list-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="comments-header">
+                        <h3 class="comments-count">
+                            <i class="fas fa-comments"></i>
+                            Comments
+                            <?php if ($commentCount > 0): ?>
+                                <span class="count-badge"><?= $commentCount; ?></span>
+                            <?php endif; ?>
+                        </h3>
+                    </div>
+
+                    <?php if ($commentCount > 0): ?>
+                        <div class="comments-list">
+                            <?php foreach ($approvedComments as $comment): ?>
+                                <div class="comment-item" data-aos="fade-up" data-aos-delay="50">
+                                    <div class="comment-header">
+                                        <div class="comment-author">
+                                            <div class="author-avatar">
+                                                <?= strtoupper(substr($comment['name'], 0, 1)); ?>
+                                            </div>
+                                            <div class="author-info">
+                                                <div class="author-name">
+                                                    <?= htmlspecialchars($comment['name']); ?>
+                                                </div>
+                                                <div class="comment-date">
+                                                    <i class="far fa-clock"></i>
+                                                    <?php
+                                                    $commentDate = strtotime($comment['created_at']);
+                                                    $now = time();
+                                                    $diff = $now - $commentDate;
+
+                                                    if ($diff < 60) {
+                                                        echo 'Just now';
+                                                    } elseif ($diff < 3600) {
+                                                        $minutes = floor($diff / 60);
+                                                        echo $minutes . ' minute' . ($minutes > 1 ? 's' : '') . ' ago';
+                                                    } elseif ($diff < 86400) {
+                                                        $hours = floor($diff / 3600);
+                                                        echo $hours . ' hour' . ($hours > 1 ? 's' : '') . ' ago';
+                                                    } elseif ($diff < 604800) {
+                                                        $days = floor($diff / 86400);
+                                                        echo $days . ' day' . ($days > 1 ? 's' : '') . ' ago';
+                                                    } else {
+                                                        echo date('M d, Y', $commentDate);
+                                                    }
+                                                    ?>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="comment-content">
+                                        <?= nl2br(htmlspecialchars($comment['content'])); ?>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php else: ?>
+                        <div class="no-comments">
+                            <i class="far fa-comment-dots"></i>
+                            <p>No comments yet. Be the first to share your thoughts!</p>
+                        </div>
+                    <?php endif; ?>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+
+<!-- Enhanced Styles -->
+<style>
+    /* ===================================
+   ENHANCED FORM STYLES
+   =================================== */
+
+    .required {
+        color: #ef4444;
+        margin-left: 2px;
+    }
+
+    .form-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .form-label i {
+        color: #667eea;
+        font-size: 0.9rem;
+    }
+
+    .field-hint {
+        font-size: 0.85rem;
+        color: #64748b;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .field-hint i {
+        font-size: 0.75rem;
+        color: #94a3b8;
+    }
+
+    .field-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 0.5rem;
+        gap: 1rem;
+    }
+
+    .char-counter {
+        font-size: 0.875rem;
+        color: #64748b;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .char-counter.warning {
+        color: #f59e0b;
+    }
+
+    .char-counter.danger {
+        color: #ef4444;
+    }
+
+    .info-notice {
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        border-left: 4px solid #3b82f6;
+        padding: 1rem 1.25rem;
+        border-radius: 12px;
+        margin: 1.5rem 0;
+        display: flex;
+        gap: 0.75rem;
+        font-size: 0.9rem;
+        color: #1e40af;
+    }
+
+    .info-notice i {
+        font-size: 1.25rem;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+    .info-notice strong {
+        font-weight: 700;
+    }
+
+    /* Form Validation States */
+    .form-control.is-invalid {
+        border-color: #ef4444;
+        background-color: #fef2f2;
+    }
+
+    .form-control.is-valid {
+        border-color: #10b981;
+        background-color: #f0fdf4;
+    }
+
+    .form-control:focus.is-invalid {
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+
+    .form-control:focus.is-valid {
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    /* ===================================
+   INLINE ALERTS (Fallback)
+   =================================== */
+
+    #alertContainer .alert {
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        font-weight: 500;
+        animation: slideDown 0.3s ease;
+        border: none;
+    }
+
+    #alertContainer .alert-success {
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        color: #065f46;
+    }
+
+    #alertContainer .alert-danger {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        color: #991b1b;
+    }
+
+    #alertContainer .alert i {
+        font-size: 1.25rem;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Submit Button Enhanced */
+    .submit-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        padding: 1rem 2.5rem;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .submit-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s;
+    }
+
+    .submit-btn:hover::before {
+        left: 100%;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    .submit-btn:active {
+        transform: translateY(0);
+    }
+
+    .submit-btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .submit-btn.loading {
+        pointer-events: none;
+    }
+
+    .submit-btn.loading i {
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .toast-container {
+            top: 70px;
+            right: 10px;
+            left: 10px;
+        }
+
+        .toast {
+            min-width: auto;
+            max-width: 100%;
+        }
+
+        .field-footer {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .info-notice {
+            font-size: 0.85rem;
+            padding: 0.875rem 1rem;
+        }
+    }
+
+    /* Toast Container Positioning */
+    .toast-container {
+        z-index: 9999 !important;
+    }
+
+    .toast {
+        min-width: 300px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .toast-body {
+        padding: 1rem;
+        font-size: 0.95rem;
+    }
+</style>
+<script src="/static/base/js/jquery.js"></script>
+<script src="/static/base/js/comments.js"></script>
+<script>
+    // Add this RIGHT AFTER your jquery.js script
+    console.log('jQuery loaded:', typeof jQuery !== 'undefined');
+    console.log('$ loaded:', typeof $ !== 'undefined');
+</script>
+<!-- AOS Animation Script -->
+<script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+<script>
+    AOS.init({
+        duration: 800,
+        once: true,
+        mirror: false
+    });
+</script>
+
+<?php include FRONTEND_TEMPLATE_PATH . "footer.php"; ?>

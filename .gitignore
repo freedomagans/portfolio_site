@@ -1,0 +1,69 @@
+# Environment and Configuration
+config/config.php
+config.sample.php
+.env
+.env.local
+.env.production
+
+# Database
+*.sql
+*.sqlite
+*.db
+
+# Logs
+*.log
+logs/
+error_log
+php_error.log
+
+# Cache and Temporary Files
+cache/
+tmp/
+temp/
+*.tmp
+*.temp
+
+# IDE and Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS Generated Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Node.js (if any)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Composer (if any)
+vendor/
+
+# Testing
+tests/
+phpunit.xml
+coverage/
+
+# Backup Files
+*.bak
+*.backup
+*.old
+
+# Media Uploads (optional - uncomment if you want to ignore uploads)
+# media/uploads/
+# media/projects/
+
+# Admin Static Files (optional - if you want to ignore admin assets)
+# static/admin/
+
+# PHPMailer
+core/phpmailer/PHPMailer-master/

@@ -1,0 +1,16 @@
+/* Keep Bootstrap defaults; only tweak small responsive modal sizing */
+@media (max-width: 991px) {
+    .modal .modal-dialog {
+        margin: 1.25rem;
+        max-width: 95%;
+    }
+}
+
+/* Optional: subtle dim of page when modal open. Do NOT use pointer-events none on everything. */
+body.modal-active .page-overlay-dim {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.05);
+    pointer-events: none;
+    z-index: 1049; /* below default backdrop 1050 */
+}
