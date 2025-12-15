@@ -2,10 +2,11 @@
 class Database //DB class defining base database connection
 {
 
-    private $host = 'localhost'; // db host
-    private $db_name = 'portfolio_db'; // db name 
-    private $username = 'root'; // db user
-    private $password = ''; // db password
+    private $host = DB_HOST; // db host
+    private $db_name = DB_NAME; // db name 
+    private $username = DB_USER; // db user
+    private $password = DB_PASS; // db password
+    private $db_charset = DB_CHARSET;
     private $conn; // db connection instance 
 
 
@@ -21,7 +22,7 @@ class Database //DB class defining base database connection
              * instantiates the PDO db connection;
              */
             $this->conn = new PDO (
-                "mysql:host={$this->host};dbname={$this->db_name};charset=utf8",
+                "mysql:host={$this->host};dbname={$this->db_name};charset={$this->db_charset}",
                 $this->username,
                 $this->password
             );

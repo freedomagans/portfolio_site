@@ -1,12 +1,12 @@
 <?php
-include ADMIN_TEMPLATE_PATH . "admin_header.php";
-include ADMIN_TEMPLATE_PATH . "admin_navigation.php";
+include ADMIN_TEMPLATE_PATH . "admin_header.php"; // admin header file
+include ADMIN_TEMPLATE_PATH . "admin_navigation.php"; // admin navigation  file
 
-require_once __DIR__ . '/../../models/CommentModel.php';
-$commentModel = new Comment();
+require_once __DIR__ . '/../../models/CommentModel.php'; // import comment Model
+$commentModel = new Comment(); // instantiate comment model instance
 
 // Pagination setup
-$perPage = 10;
+$perPage = ADMIN_ITEMS_PER_PAGE; // per page constant
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $start = ($page - 1) * $perPage;
 
@@ -14,27 +14,30 @@ $start = ($page - 1) * $perPage;
 $statusFilter = $_GET['status'] ?? null;
 
 // Total count for pagination + fetch comments
-if ($statusFilter !== null) {
+if ($statusFilter !== null and $statusFilter !== '') {
     $status = ($statusFilter === 'approved' ? 1 : 0);
     $totalComments = $commentModel->countByStatus($status);
     $comments = $commentModel->getPaginatedByStatus($status, $start, $perPage);
 } else {
     // Show ALL comments when no filter is applied
-    $totalComments = $commentModel->count(); 
-    $comments = $commentModel->getPaginatedAll($start, $perPage); 
+    $totalComments = $commentModel->count();
+    $comments = $commentModel->getPaginatedAll($start, $perPage);
 }
 
-$totalPages = ($perPage > 0) ? (int)ceil($totalComments / $perPage) : 1;
+$totalPages = (int)ceil($totalComments / $perPage); // total pages rounded up
 
-msg_error();
-msg_success();
+msg_error(); // error msg
+msg_success(); // success msg
 ?>
 
+<!-- external comments css  -->
 <link rel="stylesheet" href="/static/admin/css/comments.css">
 
+<!-- header -->
 <h2 class="mb-4">Project Comments</h2>
-<div class="row mb-3 g-2 align-items-center">
 
+<!-- Top filter and action button div -->
+<div class="row mb-3 g-2 align-items-center">
     <!-- Filter -->
     <div class="col-12 col-md-auto">
         <form method="GET" class="w-100 w-md-auto">
@@ -48,6 +51,7 @@ msg_success();
             </select>
         </form>
     </div>
+    <!-- Filter end -->
 
     <!-- Action Buttons -->
     <div class="col-12 col-md-auto d-flex flex-wrap gap-2">
@@ -61,9 +65,17 @@ msg_success();
         <a href="/urls.php?pg=comment_approve&all=disapprove"
             class="btn btn-sm btn-danger flex-fill flex-md-grow-0">Disapprove All</a>
     </div>
+    <!-- Action Buttons end -->
 </div>
+<!-- Top filter and action buttons div end -->
+
+<!-- Table div -->
 <div class="table-responsive">
+
+    <!-- Table -->
     <table class="table table-striped table-hover">
+        
+        <!-- Table head -->
         <thead class="table-dark">
             <tr>
                 <th>Name</th>
@@ -75,6 +87,7 @@ msg_success();
             </tr>
         </thead>
 
+        <!-- Table body -->
         <tbody>
             <?php if (!empty($comments)) : ?>
                 <?php foreach ($comments as $c) :
@@ -139,6 +152,7 @@ msg_success();
             <?php endif; ?>
         </tbody>
     </table>
+    <!-- table end -->
 
     <!-- Pagination -->
     <?php if ($totalPages > 1) : ?>
@@ -155,9 +169,11 @@ msg_success();
             </ul>
         </nav>
     <?php endif; ?>
+    <!-- Pagination end -->
 </div>
+<!-- Table div end -->
 
-<!-- Reusable View Modal -->
+<!-- Reusable View Modal(comment detail is populated into modal with javascript)-->
 <div class="modal fade" id="viewCommentModal" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
@@ -179,7 +195,9 @@ msg_success();
         </div>
     </div>
 </div>
+<!-- modal end -->
 
+<!-- external comments js script -->
 <script src="/static/admin/js/comments.js"></script>
 
-<?php include ADMIN_TEMPLATE_PATH . "admin_footer.php"; ?>
+<?php include ADMIN_TEMPLATE_PATH . "admin_footer.php"; // admin footer file?>

@@ -2,6 +2,10 @@
 
 // define all round functions here:
 
+/**
+ * function to beautifully display success msg
+ * @return void
+ */
 function msg_success()
 {
     if (isset($_SESSION['success'])) {
@@ -13,6 +17,10 @@ function msg_success()
     }
 }
 
+/**
+ * function to beautifully display error msg
+ * @return void
+ */
 function msg_error()
 {
     if (isset($_SESSION['error'])) {

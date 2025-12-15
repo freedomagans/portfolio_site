@@ -14,27 +14,24 @@ if (!isset($_SESSION['username'])) {
     
     
       <?php
-      require_once __DIR__ . '/../../core/Settings.php';
-      $appSettings = AppSettings::getInstance();
-      $siteTitle = $appSettings->get('site_title', 'FaedinWebworks');
-      $siteDescription = $appSettings->get('site_description', 'Professional web development and automation solutions');
-      $metaKeywords = $appSettings->get('meta_keywords', 'web development, portfolio, programming');
-      $siteLogo = $appSettings->get('site_logo', '');
+      require_once __DIR__ . '/../../core/Settings.php'; // import settings
+      $appSettings = AppSettings::getInstance(); // get settings instance
+      $siteTitle = $appSettings->get('site_title', 'FaedinWebworks'); // get site title from settings
+      $siteDescription = $appSettings->get('site_description', 'Professional web development and automation solutions'); // get site description from settings
+      $metaKeywords = $appSettings->get('meta_keywords', 'web development, portfolio, programming'); // get meta keywords from settings
+      $siteLogo = $appSettings->get('site_logo', ''); // get site logo from settings
       ?>
 
       <title><?php echo htmlspecialchars($siteTitle); ?></title>
       <meta name="description" content="<?php echo htmlspecialchars($siteDescription); ?>">
       <meta name="keywords" content="<?php echo htmlspecialchars($metaKeywords); ?>">
 
-      <!-- Favicon -->
+      <!-- Favicon(use icon from settings if set) -->
       <?php if ($siteLogo): ?>
       <link rel="icon" type="image/x-icon" href="<?php echo htmlspecialchars($siteLogo); ?>">
       <?php else: ?>
       <link rel="icon" type="image/x-icon" href="favicon.ico">
       <?php endif; ?>
-    <!-- ============================
-         CORE STYLES (ORDER MATTERS)
-    ============================= -->
     
     <!-- Bootstrap 5.2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" 
@@ -49,7 +46,7 @@ if (!isset($_SESSION['username'])) {
          JAVASCRIPT LIBRARIES
     ============================= -->
     
-    <!-- jQuery (for legacy admin widgets) -->
+    <!-- jQuery  -->
     <script src="/static/admin/js/jquery.js"></script>
     
     <!-- CKEditor 5 (Classic Build) -->

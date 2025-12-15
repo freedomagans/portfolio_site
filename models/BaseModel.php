@@ -2,94 +2,109 @@
 
 require_once __DIR__ . '/../config/Database.php'; // import the Database definition class;
 
-class BaseModel // defining the base class for all db models;
+/**
+ * defining the base database Model class for all DB Models;
+ */
+
+class BaseModel
 {
 
     public $conn; // declaring connection variable
     protected $table; // declaring table variable
 
+    /**
+     *  defining the constructor of the class
+     *  the constructor instantiates the database 
+     *  and retrieves the connection(conn) instance
+     */
     public function __construct()
     {
-        /**
-         *  defining the constructor of the class
-         */
-
-        $database = new Database(); // db instance
-        $this->conn = $database->connect(); // instantiating db connection instance
+        $database = new Database();
+        $this->conn = $database->connect();
     }
 
 
-    public function getRows()
+    /**
+     * defining method to retrieve all rows of table
+     * @return array
+     */
+    public function getRows(): array
     {
-        /**
-         * defining method to retrieve all rows of table
-         */
-
-        $query = "SELECT * FROM {$this->table}"; // query
-        $p_stmt = $this->conn->prepare($query); // prepared statement
-        $p_stmt->execute(); // execute statement
-        return $p_stmt->fetchAll(PDO::FETCH_ASSOC); // fetch result set
-
+        $query = "SELECT * FROM {$this->table}";
+        $p_stmt = $this->conn->prepare($query);
+        $p_stmt->execute();
+        return $p_stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * defining method to retrieve a row 
+     * of a table with specified ID; 
+     * @param int $id
+     * @return array
+     */
     public function getById($id)
     {
-        /**
-         * defining method to retrieve a row of a table with specified ID;
-         */
-
-        $query = "SELECT * FROM {$this->table} WHERE id = :id LIMIT 1"; // query
-        $p_stmt = $this->conn->prepare($query); // prepared statement 
+        $query = "SELECT * FROM {$this->table} WHERE id = :id LIMIT 1";
+        $p_stmt = $this->conn->prepare($query);
         $p_stmt->bindParam(":id", $id);
-        $p_stmt->execute(); // execute statment 
-        return $p_stmt->fetch(PDO::FETCH_ASSOC); // fetch row
+        $p_stmt->execute();
+        return $p_stmt->fetch(PDO::FETCH_ASSOC);
     }
+
+    /**
+     * defining method to delete row 
+     * of table for specified ID;
+     * @param int $id
+     * @return bool
+     */
 
     public function delete($id)
     {
-        /**
-         * defining method to delete row of table for specified ID;
-         */
-
-        $query = "DELETE FROM {$this->table} WHERE id = :id"; // query
-        $p_stmt = $this->conn->prepare($query); // prepared statement 
+        $query = "DELETE FROM {$this->table} WHERE id = :id";
+        $p_stmt = $this->conn->prepare($query);
         $p_stmt->bindParam(':id', $id);
-        return $p_stmt->execute(); // execute statement 
+        return $p_stmt->execute(); // returns boolean value 
     }
 
+    /**
+     * defining function to delete
+     *  all rows of table;
+     * @return bool
+     */
     public function delete_all()
     {
-        /**
-         * defining function to delete all rows of table;
-         */
-
-        $query = "DELETE FROM {$this->table}"; // query
-        $stmt = $this->conn->prepare($query); // prepared statement 
-        return $stmt->execute(); // execute statement
+        $query = "DELETE FROM {$this->table}";
+        $stmt = $this->conn->prepare($query);
+        return $stmt->execute(); // returns boolean value
     }
 
+    /**
+     * defining method to retrieve total
+     *  number of rows of table 
+     * @return int
+     */
     public function count()
     {
-        /**
-         * defining method to retrieve total number of rows of table 
-         */
-        $query = "SELECT COUNT(*) as total FROM {$this->table}"; // query
-        $stmt = $this->conn->query($query); // prepared statement
-        $row = $stmt->fetch(PDO::FETCH_ASSOC); // fetch result set
-        return $row['total']; // return total number of rows
+        $query = "SELECT COUNT(*) as total FROM {$this->table}";
+        $stmt = $this->conn->query($query);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row['total'];
     }
 
-    public function getLatest($numofRows)
+    /**
+     * defining method to retrieve
+     * latest specified nuber of rows of table
+     * @param $numOfRows
+     * @return array
+     */
+    public function getLatest($numOfRows)
     {
-        /**
-         * defining method to retrieve latest rows of table
-         */
+        $query = "SELECT * FROM {$this->table} ORDER BY created_at DESC LIMIT :numOfRows
+        "; 
+        $p_stmt = $this->conn->prepare($query); 
+        $p_stmt->bindParam(':numOfRows', $numOfRows,PDO::PARAM_INT);
+        $p_stmt->execute(); 
+        return $p_stmt->fetchAll(PDO::FETCH_ASSOC); 
 
-        $query = "SELECT * FROM {$this->table} ORDER BY created_at DESC LIMIT :numOfRows"; // query
-        $p_stmt = $this->conn->prepare($query); // prepared statement
-        $p_stmt->bindParam(':numOfRows', $numofRows, PDO::PARAM_INT);
-        $p_stmt->execute(); // execute statement
-        return $p_stmt->fetchAll(PDO::FETCH_ASSOC); // fetch result set
-        
     }
 }

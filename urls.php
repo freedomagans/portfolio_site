@@ -13,7 +13,8 @@ require_once CONFIG_PATH . 'config.php'; // import config.php
 $urls = [
     // home urls
     'index' => __DIR__ . '/templates/frontend/index.php',
-    'view' => __DIR__ . '/templates/frontend/view_project.php',
+    'projects' => __DIR__ . '/templates/frontend/project_index.php',
+    'view' => __DIR__ . '/templates/frontend/project_view.php',
 
     // contact urls
     'contact'  => __DIR__ . '/modules/contact/contact.php',
@@ -29,7 +30,7 @@ $urls = [
     'notification_all' => __DIR__ . '/modules/notifications/view_all.php',
     'notification_delete' => __DIR__ . '/modules/notifications/delete.php',
     'notification_mark_as_read' => __DIR__ . '/modules/notifications/mark_as_read.php',
-    'notification_mark_all_as_read' => __DIR__ . '/modules/notifications/mark_all_as_read.php',
+
 
     // admin comment urls
     'comment_all' => __DIR__.'/modules/comments/view_all.php',
@@ -38,7 +39,7 @@ $urls = [
     'process_comments' => __DIR__.'/modules/comments/process_comments.php',
 
     // admin project urls
-    'projects' => __DIR__ . '/modules/projects/index.php',
+    
     'project' => __DIR__ . '/modules/projects/view.php',
     'project_all' => __DIR__ . '/modules/projects/view_all.php',
     'project_delete' => __DIR__ . '/modules/projects/delete.php',
@@ -59,7 +60,7 @@ $urls = [
 ];
 
 // Get requested page if passed or home if page not passed
-$page = $_GET['pg'] ?? 'index';
+$page = $_GET['pg'] ?: 'index';
 
 // Route to requested page(?pg=)
 if (array_key_exists($page, $urls)) {

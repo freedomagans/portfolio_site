@@ -1,6 +1,6 @@
 <?php
-include ADMIN_TEMPLATE_PATH . "admin_header.php";
-include ADMIN_TEMPLATE_PATH . "admin_navigation.php";
+include ADMIN_TEMPLATE_PATH . "admin_header.php"; // admin header file 
+include ADMIN_TEMPLATE_PATH . "admin_navigation.php"; // admin navigation  file
 ?>
 
 <link rel="stylesheet" href="/static/admin/css/profile.css">
@@ -14,12 +14,12 @@ include ADMIN_TEMPLATE_PATH . "admin_navigation.php";
         </div>
 
         <?php
-        require_once __DIR__ . '/../../models/UserModel.php';
-        $userModel = new User();
-        $currentUser = $userModel->getByUsername($_SESSION['username']);
+        require_once __DIR__ . '/../../models/UserModel.php'; // import user Model
+        $userModel = new User(); // user instance
+        $currentUser = $userModel->getByUsername($_SESSION['username']); // retrieve current user
 
-        msg_success();
-        msg_error();
+        msg_success(); // display success msg if any
+        msg_error(); // display error msg if any
         ?>
 
         <div class="card profile-card shadow-lg border-0 p-4">
@@ -68,4 +68,4 @@ include ADMIN_TEMPLATE_PATH . "admin_navigation.php";
     </div>
 </div>
 
-<?php include ADMIN_TEMPLATE_PATH . "admin_footer.php"; ?>
+<?php include ADMIN_TEMPLATE_PATH . "admin_footer.php"; // admin footer file?>

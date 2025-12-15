@@ -3,11 +3,16 @@
 
     <!-- Brand -->
     <a class="navbar-brand fs-6" href="/urls.php?pg=index">
-    <img src="/media/icon.png" alt="Icon" width="20" height="20" class="d-inline-block align-text-top me-1 "><?php
-            require_once __DIR__ . '/../../core/Settings.php';
-            $appSettings = AppSettings::getInstance();
-            $siteTitle = $appSettings->get('site_title', 'FaedinWebworks');
-            echo htmlspecialchars($siteTitle)?></a>
+      <img src="<?php
+                require_once __DIR__ . '/../../core/Settings.php'; // import settings
+                $appSettings = AppSettings::getInstance(); // get settings instance
+                $siteLogo = $appSettings->get('site_logo', ''); // get site logo from settings or default
+                echo htmlspecialchars($siteLogo) ?>" alt="Icon" width="20" height="20"
+        class="d-inline-block align-text-top me-1 "><?php
+                                                    require_once __DIR__ . '/../../core/Settings.php'; // import settings 
+                                                    $appSettings = AppSettings::getInstance(); // get settings instance
+                                                    $siteTitle = $appSettings->get('site_title', 'FaedinWebworks'); // get site_title settings 
+                                                    echo htmlspecialchars($siteTitle) ?> </a>
 
     <!-- Toggler -->
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
@@ -47,6 +52,7 @@
 
       </ul>
     </div>
+    <!-- nav links end -->
 
   </div>
 </nav>

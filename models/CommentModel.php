@@ -4,10 +4,19 @@ require_once 'BaseModel.php';
 
 class Comment extends BaseModel
 {
-    protected $table = "comments";
+    /**
+     * defining model class for comments table
+     * 
+     */
+    protected $table = "comments"; // specifing table(comments)
 
     /**
-     * Create a new comment (anonymous user)
+     * method to create new comment row
+     * @param int $project_id
+     * @param string $name
+     * @param mixed $content
+     * @param int $is_approved
+     * @return bool
      */
     public function create($project_id, $name, $content, $is_approved = 0)
     {
@@ -27,7 +36,9 @@ class Comment extends BaseModel
     }
 
     /**
-     * Get approved comments for a project (public)
+     * method to get all approved comments for a single project
+     * @param int $project_id
+     * @return array
      */
     public function getApprovedByProject($project_id)
     {
@@ -44,9 +55,10 @@ class Comment extends BaseModel
     }
 
     /**
-     * Count comments by approval status
-     *
-     * @param int $status (0 = pending, 1 = approved)
+     * method to retrieve number of 
+     * comments based on approval status (0 = pending, 1 = approved)
+     * @param int $status 
+     * @return int
      */
     public function countByStatus($status)
     {
@@ -61,8 +73,7 @@ class Comment extends BaseModel
     }
 
     /**
-     * Count approved comments for a specific project
-     *
+     * method to retrieve number of approved comments for a specific project
      * @param int $project_id
      * @return int
      */
@@ -80,7 +91,7 @@ class Comment extends BaseModel
     }
 
     /**
-     * Paginate comments filtered by approval status
+     * method to return Paginated comments filtered by approval status
      *
      * @param int $status (0 = pending, 1 = approved)
      */
@@ -103,6 +114,12 @@ class Comment extends BaseModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * method to return paginated comments for all comments
+     * @param int $start
+     * @param int $perPage
+     * @return array
+     */
     public function getPaginatedAll($start, $perPage)
     {
         $query = "SELECT c.*, p.title AS project_title
@@ -120,7 +137,9 @@ class Comment extends BaseModel
     }
 
     /**
-     * Approve a single comment
+     * method to approve comments
+     * @param mixed $id
+     * @return bool
      */
     public function approve($id)
     {
@@ -131,11 +150,13 @@ class Comment extends BaseModel
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':id', $id, PDO::PARAM_INT);
 
-        return $stmt->execute();
+        return $stmt->execute(); // returns boolean value
     }
 
     /**
-     * Disapprove a single comment
+     * method to disapprove comments
+     * @param mixed $id
+     * @return bool
      */
     public function disapprove($id)
     {
@@ -146,21 +167,23 @@ class Comment extends BaseModel
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':id', $id, PDO::PARAM_INT);
 
-        return $stmt->execute();
+        return $stmt->execute(); // returns boolean value
     }
 
     /**
-     * Approve all comments
+     * method to Approve all comments
+     * @return bool
      */
     public function approveAll()
     {
         $query = "UPDATE {$this->table} SET is_approved = 1";
         $stmt = $this->conn->prepare($query);
-        return $stmt->execute();
+        return $stmt->execute(); // returns boolean value
     }
 
     /**
-     * Disapprove all comments
+     * method to Disapprove all comments
+     * @return bool
      */
     public function disapproveAll()
     {
@@ -172,19 +195,19 @@ class Comment extends BaseModel
     /**
      * Update a comment (admin)
      */
-    public function update($id, $name, $content)
-    {
-        $query = "UPDATE {$this->table} SET
-                    name = :name,
-                    content = :content
-                  WHERE id = :id";
+    // public function update($id, $name, $content)
+    // {
+    //     $query = "UPDATE {$this->table} SET
+    //                 name = :name,
+    //                 content = :content
+    //               WHERE id = :id";
 
-        $stmt = $this->conn->prepare($query);
+    //     $stmt = $this->conn->prepare($query);
 
-        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-        $stmt->bindParam(':name', $name);
-        $stmt->bindParam(':content', $content);
+    //     $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+    //     $stmt->bindParam(':name', $name);
+    //     $stmt->bindParam(':content', $content);
 
-        return $stmt->execute();
-    }
+    //     return $stmt->execute();
+    // }
 }

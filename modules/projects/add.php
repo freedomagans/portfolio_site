@@ -1,14 +1,15 @@
 <?php
-include ADMIN_TEMPLATE_PATH . "admin_header.php";
-include ADMIN_TEMPLATE_PATH . "admin_navigation.php";
+include ADMIN_TEMPLATE_PATH . "admin_header.php"; // admin header file
+include ADMIN_TEMPLATE_PATH . "admin_navigation.php"; // admin navigation file
 ?>
 
+<!-- header -->
 <h2 class="mb-4">Add New Project</h2>
 
 <?php
 // show feedback messages
-msg_error();
-msg_success();
+msg_error(); // error msg 
+msg_success(); // success msg
 ?>
 
 <!-- Add project Form -->
@@ -56,4 +57,4 @@ msg_success();
     <button type="submit" class="btn btn-success">Add Project</button>
 </form>
 
-<?php include ADMIN_TEMPLATE_PATH . "admin_footer.php"; ?>
+<?php include ADMIN_TEMPLATE_PATH . "admin_footer.php"; // admin footer file ?>

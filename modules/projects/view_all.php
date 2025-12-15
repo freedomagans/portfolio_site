@@ -1,12 +1,12 @@
 <?php
-include ADMIN_TEMPLATE_PATH . "admin_header.php";
-include ADMIN_TEMPLATE_PATH . "admin_navigation.php";
+include ADMIN_TEMPLATE_PATH . "admin_header.php"; // admin header file
+include ADMIN_TEMPLATE_PATH . "admin_navigation.php"; // admin navigation file
 
-require_once __DIR__ . '/../../models/ProjectModel.php';
-$projectModel = new Project();
+require_once __DIR__ . '/../../models/ProjectModel.php'; // import Project Model
+$projectModel = new Project(); // project model instance
 
 // Pagination setup
-$perPage = 10;
+$perPage = ADMIN_ITEMS_PER_PAGE; // per page constant
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $start = ($page - 1) * $perPage;
 
@@ -14,7 +14,7 @@ $start = ($page - 1) * $perPage;
 $statusFilter = $_GET['status'] ?? null;
 
 // Total count for pagination + fetch projects
-if ($statusFilter !== null) {
+if ($statusFilter !== null and $statusFilter !== '') {
     $status = ($statusFilter === 'published' ? 1 : 0);
     $totalProjects = $projectModel->countByStatus($status);
     $projects = $projectModel->getPaginatedByStatus($status, $start, $perPage);
@@ -24,18 +24,22 @@ if ($statusFilter !== null) {
     $projects = $projectModel->getPaginatedAll($start, $perPage);
 }
 
-$totalPages = ($perPage > 0) ? (int)ceil($totalProjects / $perPage) : 1;
+$totalPages = (int)ceil($totalProjects / $perPage); // total pages caculation
 
-msg_error();
-msg_success();
+msg_error(); // error msg
+msg_success(); // success msg
 ?>
 
+<!-- external projects admin css -->
 <link rel="stylesheet" href="/static/admin/css/projects_admin.css">
 
+<!-- header -->
 <h2 class="mb-4">All Projects</h2>
+
+<!-- Top filter and action buttons div -->
 <div class="row mb-3 g-2 align-items-center">
 
-    <!-- Filter -->
+    <!-- Filter form -->
     <div class="col-12 col-md-auto">
         <form method="GET" class="w-100 w-md-auto">
             <input type="hidden" name="pg" value="project_all">
@@ -48,6 +52,7 @@ msg_success();
             </select>
         </form>
     </div>
+    <!-- Filter form end -->
 
     <!-- Action Buttons -->
     <div class="col-12 col-md-auto d-flex flex-wrap gap-2">
@@ -59,13 +64,20 @@ msg_success();
         <a href="/urls.php?pg=project_add"
             class="btn btn-sm btn-success flex-fill flex-md-grow-0">Add New Project</a>
     </div>
+    <!-- Action buttons end -->
+
 </div>
+<!-- Top filter and action buttons div end -->
 
 <!-- Page dim element for subtle style when modal is open -->
 <div class="page-overlay-dim" aria-hidden="true"></div>
 
+<!-- Table div  -->
 <div class="table-responsive">
+    <!-- Table -->
     <table class="table table-striped table-hover">
+
+        <!-- Table head -->
         <thead class="table-dark">
             <tr>
                 <th>ID</th>
@@ -78,6 +90,7 @@ msg_success();
             </tr>
         </thead>
 
+        <!-- Table body -->
         <tbody>
             <?php if (!empty($projects)) : ?>
                 <?php foreach ($projects as $project) :
@@ -157,6 +170,7 @@ msg_success();
             <?php endif; ?>
         </tbody>
     </table>
+    <!-- Table end -->
 
     <!-- Pagination -->
     <?php if ($totalPages > 1) : ?>
@@ -173,8 +187,9 @@ msg_success();
             </ul>
         </nav>
     <?php endif; ?>
+    <!-- pagination end -->
+
 </div>
+<!-- Table div end -->
 
-
-
-<?php include ADMIN_TEMPLATE_PATH . "admin_footer.php"; ?>
+<?php include ADMIN_TEMPLATE_PATH . "admin_footer.php"; // admin footer file ?>

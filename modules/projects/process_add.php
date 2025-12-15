@@ -2,12 +2,12 @@
 require_once __DIR__ . '/../../models/ProjectModel.php'; // import project db model class 
 $projectModel = new Project(); // project instance
 
+/**
+ * confirms form is submitted with POST method
+ * on submission of add form 
+ * values are cleansed and stored in database;
+ */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
-    /**
-     * on submission of add form 
-     * values are cleansed and stored in database;
-     */
 
     // triming and cleansing posted form values;
     $title = trim($_POST['title']);
@@ -27,12 +27,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $image1 = $image2 = $image3 = null; // nullify image variables
 
+    /**
+     * uploads image1 to uploads folder(media) using the 
+     * move_uploaded_file() method;
+     */
     if (isset($_FILES['image1']) && $_FILES['image1']['error'] === UPLOAD_ERR_OK) {
-        /**
-         * uploads image1 to uploads folder(media) using the 
-         * move_uploaded_file() method;
-         */
-
         $image1 = time() . '_' . basename($_FILES['image1']['name']);
         move_uploaded_file($_FILES['image1']['tmp_name'], $uploadsDir . $image1);
     } else {
@@ -41,20 +40,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    /**
+     * uploads image2 to uploads folder(media) using the move_uploaded_file() method;
+     */
     if (isset($_FILES['image2']) && $_FILES['image2']['error'] === UPLOAD_ERR_OK) {
-        /**
-         * uploads image2 to uploads folder(media) using the move_uploaded_file() method;
-         */
-
         $image2 = time() . '_' . basename($_FILES['image2']['name']);
         move_uploaded_file($_FILES['image2']['tmp_name'], $uploadsDir . $image2);
     }
 
+    /**
+     * uploads image3 to uploads folder(media) using the move_uploaded_file() method;
+     */
     if (isset($_FILES['image3']) && $_FILES['image3']['error'] === UPLOAD_ERR_OK) {
-        /**
-         * uploads image3 to uploads folder(media) using the move_uploaded_file() method;
-         */
-
         $image3 = time() . '_' . basename($_FILES['image3']['name']);
         move_uploaded_file($_FILES['image3']['tmp_name'], $uploadsDir . $image3);
     }
@@ -62,6 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Insert into database using the create() method;
     $created = $projectModel->create($title, $slug, $description, $image1, $image2, $image3, $live_url, $github_url, $is_published);
 
+    // if project row is created return feedback msgs 
     if ($created) {
         $_SESSION['success'] = "Project added successfully!"; // success msg
         header("Location: ?pg=project_all"); // redirect to projects page

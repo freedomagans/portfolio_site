@@ -1,8 +1,12 @@
 <?php
 require_once __DIR__ . '/../../models/CommentModel.php'; // import Comment db Model class
 
-$commentModel = new Comment(); // comment instance
+$commentModel = new Comment(); // comment Model instance
 
+/**
+ * delete single or all comments based on 
+ * GET parameters 'id' or 'all' .
+ */
 if ($commentModel->count() != 0) {
 
     if (isset($_GET['id'])) {
@@ -30,7 +34,7 @@ if ($commentModel->count() != 0) {
     }
 
 } else {
-    $_SESSION['error'] = 'No comments found.';
+    $_SESSION['error'] = 'No comments found.'; // error msg feedback
 }
 
 // redirect to comments page

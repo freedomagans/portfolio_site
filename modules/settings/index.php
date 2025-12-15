@@ -13,40 +13,130 @@ $settingsModel = new Settings();
 $message = '';
 $messageType = '';
 
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $updatedCount = 0;
         $uploadedFiles = [];
+        $errors = [];
 
-        // Handle file uploads
-        foreach ($_FILES as $key => $file) {
-            if ($file['error'] === UPLOAD_ERR_OK) {
-                $uploadDir = __DIR__ . '/../../media/uploads/';
-                if (!is_dir($uploadDir)) {
-                    mkdir($uploadDir, 0755, true);
-                }
-                $fileName = uniqid() . '_' . basename($file['name']);
-                $uploadPath = $uploadDir . $fileName;
-                if (move_uploaded_file($file['tmp_name'], $uploadPath)) {
-                    $uploadedFiles[$key] = '/media/uploads/' . $fileName;
-                }
+        // Step 1: Process file uploads FIRST
+        foreach ($_FILES as $fileKey => $file) {
+            // Skip if no file uploaded or error
+            if ($file['error'] === UPLOAD_ERR_NO_FILE) {
+                continue;
+            }
+            
+            if ($file['error'] !== UPLOAD_ERR_OK) {
+                $errors[] = "File upload error for {$fileKey}";
+                continue;
+            }
+
+            // Validate file
+            $allowedTypes = ALLOWED_IMAGE_TYPES;
+            $maxSize = MAX_FILE_SIZE; // 5MB
+            
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $mimeType = finfo_file($finfo, $file['tmp_name']);
+            finfo_close($finfo);
+            
+            if (!in_array($mimeType, $allowedTypes)) {
+                $errors[] = "Invalid file type. Only images allowed.";
+                continue;
+            }
+            
+            if ($file['size'] > $maxSize) {
+                $errors[] = "File exceeds 5MB limit.";
+                continue;
+            }
+
+            // Upload file
+            $uploadDir = __DIR__ . '/../../media/uploads/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+            
+            $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+            $fileName = uniqid() . '_' . time() . '.' . $extension;
+            $uploadPath = $uploadDir . $fileName;
+            
+            if (move_uploaded_file($file['tmp_name'], $uploadPath)) {
+                // CRITICAL FIX: Store with the form field name as key
+                $uploadedFiles[$fileKey] = '/media/uploads/' . $fileName;
+            } else {
+                $errors[] = "Failed to upload file";
             }
         }
 
-        // Process settings
+        // Step 2: Get current settings for comparison
+        $currentSettings = [];
+        foreach ($settingsModel->getAll() as $setting) {
+            $currentSettings[$setting['setting_key']] = $setting['setting_value'];
+        }
+
+        // Step 3: Process POST settings
+        $processedKeys = [];
+        
         foreach ($_POST as $key => $value) {
-            if (strpos($key, 'setting_') === 0) {
-                $settingKey = str_replace('setting_', '', $key);
-                if (isset($uploadedFiles[$key])) {
-                    $value = $uploadedFiles[$key];
-                }
+            // Only process fields that start with 'setting_'
+            if (strpos($key, 'setting_') !== 0) {
+                continue;
+            }
+            
+            $settingKey = str_replace('setting_', '', $key);
+            
+            // Skip if we've already processed this key (handles hidden checkbox fields)
+            if (in_array($settingKey, $processedKeys)) {
+                continue;
+            }
+            
+            $processedKeys[] = $settingKey;
+            
+            
+            if (isset($uploadedFiles[$key])) {
+                // Use the uploaded file path instead of the POST value
+                $value = $uploadedFiles[$key];
+            }
+            
+            // Trim string values
+            if (is_string($value)) {
+                $value = trim($value);
+            }
+            
+            // Only update if value actually changed
+            $currentValue = $currentSettings[$settingKey] ?? '';
+            
+            if ($currentValue !== $value) {
                 if ($settingsModel->set($settingKey, $value)) {
                     $updatedCount++;
                 }
             }
         }
 
-        if ($updatedCount > 0) {
+        // Step 4: Handle files that don't have POST fields
+        // This ensures file uploads work even if there's no corresponding text input
+        foreach ($uploadedFiles as $fileKey => $filePath) {
+            if (strpos($fileKey, 'setting_') === 0) {
+                $settingKey = str_replace('setting_', '', $fileKey);
+                
+                // Only update if we haven't already processed this setting
+                if (!in_array($settingKey, $processedKeys)) {
+                    $currentValue = $currentSettings[$settingKey] ?? '';
+                    
+                    if ($currentValue !== $filePath) {
+                        if ($settingsModel->set($settingKey, $filePath)) {
+                            $updatedCount++;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Step 5: Show appropriate message
+        if (!empty($errors)) {
+            $message = "Errors occurred: " . implode(', ', $errors);
+            $messageType = 'danger';
+        } elseif ($updatedCount > 0) {
             $message = "Successfully updated {$updatedCount} setting(s)!";
             $messageType = 'success';
             $settingsModel->clearCache();
@@ -54,11 +144,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $message = "No changes were made.";
             $messageType = 'info';
         }
+        
     } catch (Exception $e) {
         $message = "Error updating settings: " . $e->getMessage();
         $messageType = 'danger';
+        error_log("Settings update error: " . $e->getMessage());
     }
 }
+
 
 $groupedSettings = $settingsModel->getAllGrouped();
 $groupOrder = ['general', 'email', 'social', 'seo', 'content', 'security'];
@@ -203,7 +296,7 @@ $groupIcons = [
                                                 <?php if ($fieldValue): ?>
                                                     <div class="current-file mt-2">
                                                         <i class="fas fa-image me-1"></i>
-                                                        Current: <a href="<?= htmlspecialchars($fieldValue) ?>" target="_blank">View File</a>
+                                                        Current: <a href="<?= htmlspecialchars($fieldValue) ?>">View File</a>
                                                     </div>
                                                 <?php endif; ?>
                                             </div>
@@ -289,7 +382,7 @@ $groupIcons = [
                 <div class="col-md-3 col-6">
                     <div class="stat-card">
                         <i class="fas fa-clock text-warning fa-2x mb-2"></i>
-                        <h5 class="mb-0">Just Now</h5>
+                        <span class="mb-0"><?php echo $settingsModel->getLastUpdated() ?></span>
                         <small class="text-muted">Last Updated</small>
                     </div>
                 </div>

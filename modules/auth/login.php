@@ -1,18 +1,18 @@
 <?php
-include FRONTEND_TEMPLATE_PATH . 'header.php';
-include FRONTEND_TEMPLATE_PATH . 'navigation.php';
+include FRONTEND_TEMPLATE_PATH . 'header.php'; // admin header file
+include FRONTEND_TEMPLATE_PATH . 'navigation.php'; // admin navigation  file
 ?>
 
 <?php
 require_once __DIR__ . '/../../models/UserModel.php'; // import userModel
 require_once __DIR__ . '/../../core/Settings.php'; // import settings
 
+/**
+ * on submitting login credentials
+ * the user is authenticated with the defined logout method
+ * of the User Model instance;
+ */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-	/**
-	 * on submitting login credentials
-	 * the user is authenticated with the defined logout method
-	 * of the User instance;
-	 */
 	$username = trim($_POST['username']); // retrieve username;
 	$password = trim($_POST['password']); // retrieve password;
 	$user = new User(); // instantiate user instance;
@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 	// Get security settings
 	$settings = AppSettings::getInstance();
 	$securitySettings = $settings->getSecuritySettings();
-	$maxAttempts = $securitySettings['login_attempts'];
+	$maxAttempts = $securitySettings['login_attempts']; // get max attempts from settings
 	$ip = $_SERVER['REMOTE_ADDR'];
 
 	// Check if IP is blocked before attempting login
@@ -81,4 +81,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 	</div>
 </div>
 
-<?php include FRONTEND_TEMPLATE_PATH . "footer.php"; ?>
+<?php include FRONTEND_TEMPLATE_PATH . "footer.php"; // admin footer file 
+?>

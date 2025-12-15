@@ -1,196 +1,23 @@
-<?php include FRONTEND_TEMPLATE_PATH . "header.php"; ?>
-<?php include FRONTEND_TEMPLATE_PATH . "navigation.php"; ?>
+<?php include FRONTEND_TEMPLATE_PATH . "header.php"; // header file ?>
+<?php include FRONTEND_TEMPLATE_PATH . "navigation.php"; // navigation file ?>
 <?php 
-require_once __DIR__ . '/../../core/Settings.php';
-$settings = AppSettings::getInstance();
-$siteInfo = $settings->getSiteInfo();
-$socialLinks = $settings->getSocialLinks();
+require_once __DIR__ . '/../../core/Settings.php'; // import settings
+$settings = AppSettings::getInstance(); // get settings instance
+$siteInfo = $settings->getSiteInfo(); // get siteinfo settings
+$socialLinks = $settings->getSocialLinks(); // get sociallinks settings
 ?>
-<!-- About Page Content -->
+
+<!-- AOS css -->
 <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
 
-<style>
-    /* Prevent horizontal scrollbar globally */
-    body {
-        overflow-x: hidden;
-        margin: 0;
-        padding: 0;
-    }
+<!-- external index css -->
+<link href="/static/base/css/index.css" rel="stylesheet">
 
-    /* Custom Styles */
-    .hero-section {
-        /* Tech-oriented dark background */
-        background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
-        color: #fff;
-        padding: 80px 0;
-        /* Add padding for fixed navbar - typical Bootstrap navbar is ~56px */
-        padding-top: 136px;
-        /* 56px navbar + 80px section padding */
-        margin-top: 0;
-    }
-
-    .hero-section h1 {
-        font-size: 3rem;
-    }
-
-    .card-hover:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-        transition: all 0.4s ease;
-    }
-
-    .section-title {
-        position: relative;
-        display: inline-block;
-    }
-
-    .section-title::after {
-        content: '';
-        position: absolute;
-        width: 60px;
-        height: 4px;
-        background-color: #1cc88a;
-        left: 0;
-        bottom: -10px;
-        border-radius: 2px;
-    }
-
-    .btn-hover:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-        transition: all 0.3s ease;
-    }
-
-    /* Ensure containers don't overflow */
-    .container,
-    .container-fluid {
-        max-width: 100%;
-    }
-
-    /* Prevent row overflow */
-    .row {
-        margin-left: 0;
-        margin-right: 0;
-    }
-
-    /* Prevent horizontal scrollbar globally */
-    body {
-        overflow-x: hidden;
-        margin: 0;
-        padding: 0;
-    }
-
-    /* Custom Styles */
-    .hero-section {
-        /* Tech-oriented dark background */
-        background-image: url('/media/hero.png');
-        color: #fff;
-        padding: 80px 0;
-        /* Add padding for fixed navbar - typical Bootstrap navbar is ~56px */
-        padding-top: 136px;
-        margin-top: 0;
-        min-height: 100vh;
-        /* Full viewport height for better visual */
-        display: flex;
-        align-items: center;
-    }
-
-    .hero-section h1 {
-        font-size: 3rem;
-    }
-
-    .hero-image-container {
-        position: relative;
-        padding: 20px;
-    }
-
-    .hero-image {
-        width: 100%;
-        max-width: 450px;
-        height: auto;
-        border-radius: 20px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-        transition: transform 0.3s ease;
-    }
-
-    .hero-image:hover {
-        transform: scale(1.02);
-    }
-
-    /* Alternative: Circular profile image */
-    .hero-image-circle {
-        width: 100%;
-        max-width: 400px;
-        height: 400px;
-        object-fit: cover;
-        border-radius: 50%;
-        border: 5px solid rgba(28, 200, 138, 0.3);
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-    }
-
-    .card-hover:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-        transition: all 0.4s ease;
-    }
-
-    .section-title {
-        position: relative;
-        display: inline-block;
-    }
-
-    .section-title::after {
-        content: '';
-        position: absolute;
-        width: 60px;
-        height: 4px;
-        background-color: #1cc88a;
-        left: 0;
-        bottom: -10px;
-        border-radius: 2px;
-    }
-
-    .btn-hover:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-        transition: all 0.3s ease;
-    }
-
-    /* Ensure containers don't overflow */
-    .container,
-    .container-fluid {
-        max-width: 100%;
-    }
-
-    /* Prevent row overflow */
-    .row {
-        margin-left: 0;
-        margin-right: 0;
-    }
-
-    /* Responsive adjustments */
-    @media (max-width: 991px) {
-        .hero-section {
-            min-height: auto;
-            padding: 100px 0 60px 0;
-        }
-
-        .hero-section h1 {
-            font-size: 2.5rem;
-        }
-
-        .hero-image,
-        .hero-image-circle {
-            max-width: 300px;
-            margin: 0 auto 30px;
-            display: block;
-        }
-    }
-</style>
+<!-- external hero css -->
 <link href="/static/base/css/hero.css" rel="stylesheet">
 
 
-<!-- Enhanced Hero / Introduction Section -->
+<!-- Hero / Introduction Section -->
 <section class="hero-section">
     <div class="container">
         <div class="row align-items-center g-5">
@@ -258,9 +85,9 @@ $socialLinks = $settings->getSocialLinks();
                     <div class="stat-item">
                         <div class="stat-number">
                             <?php
-                            require MODELS_PATH . 'ProjectModel.php';
-                            $projectModel = new Project();
-                            $projectCount = $projectModel->count();
+                            require MODELS_PATH . 'ProjectModel.php'; // import Project Model
+                            $projectModel = new Project(); // project instance
+                            $projectCount = $projectModel->count(); // get number of projects 
                             echo $projectCount;
                             ?></div>
                         <div class="stat-label">Projects</div>
@@ -289,18 +116,18 @@ $socialLinks = $settings->getSocialLinks();
                     </a>
                 </div>
 
-                <!-- Social Links -->
+                <!-- Social Links using socail links from settings or default constant values -->
                 <div class="hero-social mt-4">
-                    <a href="<?php echo htmlspecialchars($socialLinks['github'] ?? '#'); ?>" class="social-link" title="GitHub">
+                    <a href="<?php echo htmlspecialchars($socialLinks['github'] ?: GITHUB_URL); ?>" class="social-link" title="GitHub">
                         <i class="fab fa-github"></i>
                     </a>
-                    <a href="<?php echo htmlspecialchars($socialLinks['linkedin'] ?? '#'); ?>" class="social-link" title="LinkedIn">
+                    <a href="<?php echo htmlspecialchars($socialLinks['linkedin'] ?: LINKEDIN_URL); ?>" class="social-link" title="LinkedIn">
                         <i class="fab fa-linkedin-in"></i>
                     </a>
-                    <a href="<?php echo htmlspecialchars($socialLinks['twitter'] ?? '#'); ?>" class="social-link" title="Twitter">
+                    <a href="<?php echo htmlspecialchars($socialLinks['twitter'] ?: TWITTER_URL); ?>" class="social-link" title="Twitter">
                         <i class="fab fa-twitter"></i>
                     </a>
-                    <a href="<?php echo htmlspecialchars($socialLinks['instagram'] ?? '#'); ?>" class="social-link" title="Instagram">
+                    <a href="<?php echo htmlspecialchars($socialLinks['instagram'] ?: INSTAGRAM_URL); ?>" class="social-link" title="Instagram">
                         <i class="fab fa-instagram"></i>
                     </a>
                 </div>
@@ -315,8 +142,9 @@ $socialLinks = $settings->getSocialLinks();
         <div class="floating-shape shape-2"></div>
         <div class="floating-shape shape-3"></div>
     </div>
-</section>
 
+</section>
+<!-- Hero section end -->
 
 <!-- Skills & Expertise Section -->
 <section class="py-5 bg-light">
@@ -356,14 +184,17 @@ $socialLinks = $settings->getSocialLinks();
         </div>
     </div>
 </section>
+<!-- skills & expertise section end -->
 
 <!-- Vision Section -->
 <section class="py-5">
     <div class="container">
         <div class="row align-items-center g-5">
+            <!-- logo img -->
             <div class="col-lg-6" data-aos="fade-right">
                 <img src="/media/logo.png" class="img-fluid rounded shadow" alt="Vision Image">
             </div>
+            <!-- Vision  -->
             <div class="col-lg-6" data-aos="fade-left">
                 <h2 class="fw-bold mb-3 section-title">Our Vision</h2>
                 <p class="text-muted">FaedinWebworks is the cornerstone of a greater tech entity serving web, app, and automation needs. Our mission is to deliver professional, scalable, and innovative solutions to clients of all sizes.</p>
@@ -378,12 +209,17 @@ $socialLinks = $settings->getSocialLinks();
     <div class="container">
         <h2 class="fw-bold mb-3 section-title" data-aos="fade-up">Get in Touch</h2>
         <p class="text-muted mb-4" data-aos="fade-up" data-aos-delay="100">Reach out directly via WhatsApp or email for collaboration or inquiries.</p>
-        <a href="https://wa.me/09049314547" class="btn btn-success btn-lg me-3 btn-hover" target="_blank" data-aos="zoom-in" data-aos-delay="200">
+
+        <!-- WhatsApp link -->
+        <a href="<?= WHATSAPP_URL ?>" class="btn btn-success btn-lg me-3 btn-hover" target="_blank" data-aos="zoom-in" data-aos-delay="200">
             <i class="fa-brands fa-whatsapp me-2"></i> WhatsApp
         </a>
-        <a href="mailto:freedomganmwonyi99@gmail.com" class="btn btn-primary btn-lg btn-hover" data-aos="zoom-in" data-aos-delay="300">
+
+        <!-- Email link -->
+        <a href="mailto:<?= EMAIL ?>" class="btn btn-primary btn-lg btn-hover" data-aos="zoom-in" data-aos-delay="300">
             <i class="fa-solid fa-envelope me-2"></i> Email
         </a>
+
     </div>
 </section>
 
@@ -395,6 +231,7 @@ $socialLinks = $settings->getSocialLinks();
     </div>
 </section>
 
+<!-- AOS ANIMATION SCRIPT -->
 <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
 <script>
     AOS.init({
@@ -404,4 +241,4 @@ $socialLinks = $settings->getSocialLinks();
     });
 </script>
 
-<?php include FRONTEND_TEMPLATE_PATH . "footer.php"; ?>
+<?php include FRONTEND_TEMPLATE_PATH . "footer.php"; // footer file?>

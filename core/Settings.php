@@ -6,14 +6,14 @@
 
 class AppSettings
 {
-    private static $instance = null;
-    private $settingsModel;
-    private $cache = [];
+    private static $instance = null; // define singleton instance
+    private $settingsModel; // declare Settings model instance
+    private $cache = []; // cache for settings values
 
     private function __construct()
     {
-        require_once __DIR__ . '/../models/SettingsModel.php';
-        $this->settingsModel = new Settings();
+        require_once __DIR__ . '/../models/SettingsModel.php'; // import Settings model
+        $this->settingsModel = new Settings(); // instantiate Settings model
     }
 
     /**
@@ -35,7 +35,7 @@ class AppSettings
         if (!isset($this->cache[$key])) {
             $this->cache[$key] = $this->settingsModel->get($key);
         }
-        return $this->cache[$key] ?? $default;
+        return $this->cache[$key] ?: $default;
     }
 
     /**
@@ -163,12 +163,23 @@ class AppSettings
     }
 }
 
-// Convenience function for global access
+/**
+ * convenient method for getting setting from db
+ * @param mixed $key
+ * @param mixed $default
+ * @return mixed
+ */
 function getSetting($key, $default = null)
 {
     return AppSettings::getInstance()->get($key, $default);
 }
 
+/**
+ * convenient method for updating settings
+ * @param mixed $key
+ * @param mixed $value
+ * @return bool
+ */
 function setSetting($key, $value)
 {
     return AppSettings::getInstance()->set($key, $value);

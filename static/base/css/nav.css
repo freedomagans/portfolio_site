@@ -1,0 +1,369 @@
+/* ========================================
+   MODERN NAVIGATION BAR
+   ======================================== */
+
+/* Base Navigation */
+.navbar-modern {
+  background: rgba(0, 0, 0, 0.95);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  padding: 1rem 0;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 1000;
+}
+
+/* Container inside navbar */
+.navbar-modern .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Scrolled State */
+.navbar-modern.scrolled {
+  padding: 0.75rem 0;
+  background: rgba(0, 0, 0, 0.98);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+}
+
+/* Navigation Spacer */
+.nav-spacer {
+  height: 80px; /* Adjust based on your nav height */
+}
+
+/* ========================================
+   BRAND / LOGO
+   ======================================== */
+
+.brand-modern {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  text-decoration: none;
+  color: white;
+  font-weight: 800;
+  font-size: 1.5rem;
+  transition: all 0.3s ease;
+  position: relative;
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  z-index: 1;
+}
+
+.brand-modern:hover {
+  color: white;
+  transform: translateY(-2px);
+}
+
+/* Brand Icon */
+.brand-icon {
+  width: 45px;
+  height: 45px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  transition: all 0.3s ease;
+}
+
+.brand-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+
+.brand-modern:hover .brand-icon {
+  transform: rotate(5deg) scale(1.1);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+}
+
+/* Brand Text */
+.brand-text {
+  font-weight: 900;
+  font-size: 1.4rem;
+  background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.5px;
+  position: relative;
+}
+
+/* Brand Glow Effect */
+.brand-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  opacity: 0;
+  filter: blur(15px);
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.brand-modern:hover .brand-glow {
+  opacity: 0.4;
+}
+
+/* ========================================
+   MOBILE TOGGLE BUTTON
+   ======================================== */
+
+.mobile-toggle {
+  width: 45px;
+  height: 45px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.mobile-toggle:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: #667eea;
+}
+
+.toggle-line {
+  width: 24px;
+  height: 2px;
+  background: white;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+/* Toggle Animation */
+.mobile-toggle[aria-expanded="true"] .toggle-line:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.mobile-toggle[aria-expanded="true"] .toggle-line:nth-child(2) {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+
+.mobile-toggle[aria-expanded="true"] .toggle-line:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* ========================================
+   NAVIGATION LINKS
+   ======================================== */
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-item {
+  position: relative;
+}
+
+/* Modern Link Style */
+.nav-link-modern {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1.5rem;
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-link-modern::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s;
+}
+
+.nav-link-modern:hover::before {
+  left: 100%;
+}
+
+.nav-link-modern:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Active Link */
+.nav-link-modern.active {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
+  color: white;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+/* Link Icon */
+.link-icon {
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+}
+
+.nav-link-modern:hover .link-icon {
+  transform: scale(1.2);
+}
+
+/* Link Text */
+.link-text {
+  font-weight: 600;
+}
+
+/* CTA Link (Special styling for Login/Logout) */
+.nav-link-cta {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white !important;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  margin-left: 0.5rem;
+}
+
+.nav-link-cta:hover {
+  background: linear-gradient(135deg, #5568d3 0%, #653a8b 100%);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+}
+
+/* ========================================
+   SCROLL PROGRESS BAR
+   ======================================== */
+
+.scroll-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  width: 0%;
+  transition: width 0.3s ease;
+  box-shadow: 0 2px 10px rgba(102, 126, 234, 0.5);
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
+@media (max-width: 991px) {
+  .mobile-toggle {
+    display: flex;
+  }
+
+  .navbar-collapse {
+    margin-top: 1rem;
+  }
+
+  .nav-links {
+    flex-direction: column;
+    width: 100%;
+    gap: 0.75rem;
+    padding: 1rem 0;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 16px;
+    margin-top: 1rem;
+  }
+
+  .nav-link-modern {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 1rem 1.5rem;
+  }
+
+  .nav-link-cta {
+    margin-left: 0;
+  }
+
+  /* Mobile Menu Animation */
+  .navbar-collapse.collapsing {
+    transition: height 0.3s ease;
+  }
+
+  .navbar-collapse.show {
+    animation: slideDown 0.3s ease-out;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .brand-text {
+    font-size: 1.2rem;
+  }
+
+  .brand-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .nav-link-modern {
+    font-size: 0.9rem;
+    padding: 0.875rem 1.25rem;
+  }
+
+  .link-icon {
+    font-size: 1rem;
+  }
+}
+
+/* ========================================
+   ACCESSIBILITY
+   ======================================== */
+
+.nav-link-modern:focus-visible,
+.mobile-toggle:focus-visible,
+.brand-modern:focus-visible {
+  outline: 3px solid #667eea;
+  outline-offset: 3px;
+  border-radius: 12px;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .nav-link-modern,
+  .brand-modern,
+  .mobile-toggle,
+  .navbar-modern {
+    transition: none;
+    animation: none;
+  }
+}

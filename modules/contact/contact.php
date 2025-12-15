@@ -1,22 +1,21 @@
 <?php
 // Get settings instance
-require_once __DIR__ . '/../../core/Settings.php';
-$settings = AppSettings::getInstance();
-$siteInfo = $settings->getSiteInfo();
-$socialLinks = $settings->getSocialLinks();
-
-include FRONTEND_TEMPLATE_PATH . 'header.php';
-include FRONTEND_TEMPLATE_PATH . 'navigation.php';
+require_once __DIR__ . '/../../core/Settings.php'; // import settings
+$settings = AppSettings::getInstance(); // get settings instance
+$siteInfo = $settings->getSiteInfo(); // get siteInfo settings
+$socialLinks = $settings->getSocialLinks(); // get SocialLinks settings
+include FRONTEND_TEMPLATE_PATH . 'header.php'; // admin header file
+include FRONTEND_TEMPLATE_PATH . 'navigation.php'; // admin navigation  file
 ?>
 
-
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" />
-<!-- Contact Page Styles -->
+<!-- external contact page css -->
 <link href="/static/base/css/contact.css" rel="stylesheet">
 
 
 <!-- Contact Section -->
 <section class="contact-section mt-3">
+    <!-- container  -->
     <div class="container">
         <div class="row g-4">
 
@@ -94,8 +93,10 @@ include FRONTEND_TEMPLATE_PATH . 'navigation.php';
                             <i class="fa fa-arrow-right"></i>
                         </button>
                     </form>
+                    <!-- form end -->
                 </div>
             </div>
+            <!-- Contact form column end -->
 
 
             <!-- Contact Info Column -->
@@ -110,7 +111,7 @@ include FRONTEND_TEMPLATE_PATH . 'navigation.php';
                         </div>
                         <div class="contact-details">
                             <h5>Email Address</h5>
-                            <p><a style="font-size: 12.5px;" href="mailto:<?php echo htmlspecialchars($siteInfo['email'] ?? 'freedomaganmwonyi99@gmail.com'); ?>"><?php echo htmlspecialchars($siteInfo['email'] ?? 'freedomaganmwonyi99@gmail.com'); ?></a></p>
+                            <p><a style="font-size: 12.5px;" href="mailto:<?php echo htmlspecialchars($siteInfo['email'] ?: 'freedomaganmwonyi99@gmail.com'); ?>"><?php echo htmlspecialchars($siteInfo['email'] ?: 'freedomaganmwonyi99@gmail.com'); ?></a></p>
                         </div>
                     </div>
 
@@ -121,7 +122,7 @@ include FRONTEND_TEMPLATE_PATH . 'navigation.php';
                         </div>
                         <div class="contact-details">
                             <h5>Phone Number</h5>
-                            <p><a href="tel:+234 08168247299"><?php echo htmlspecialchars($siteInfo['phone'] ?? '+234 8168247299'); ?></a></p>
+                            <p><a href="tel:+234 08168247299"><?php echo htmlspecialchars($siteInfo['phone'] ?: '+234 8168247299'); ?></a></p>
                         </div>
                     </div>
 
@@ -140,16 +141,16 @@ include FRONTEND_TEMPLATE_PATH . 'navigation.php';
                     <div class="mt-4">
                         <h5 class="fw-bold mb-3" style="color: #1e293b;">Follow Me</h5>
                         <div class="social-links">
-                            <a href="<?php echo htmlspecialchars($socialLinks['github'] ?? '#'); ?>" class="social-link" title="GitHub">
+                            <a href="<?php echo htmlspecialchars($socialLinks['github'] ?: GITHUB_URL); ?>" class="social-link" title="GitHub">
                                 <i class="fab fa-github"></i>
                             </a>
-                            <a href="<?php echo htmlspecialchars($socialLinks['linkedin'] ?? '#'); ?>" class="social-link" title="LinkedIn">
+                            <a href="<?php echo htmlspecialchars($socialLinks['linkedin'] ?: LINKEDIN_URL); ?>" class="social-link" title="LinkedIn">
                                 <i class="fab fa-linkedin-in"></i>
                             </a>
-                            <a href="<?php echo htmlspecialchars($socialLinks['twitter'] ?? '#'); ?>" class="social-link" title="Twitter">
+                            <a href="<?php echo htmlspecialchars($socialLinks['twitter'] ?: TWITTER_URL); ?>" class="social-link" title="Twitter">
                                 <i class="fab fa-twitter"></i>
                             </a>
-                            <a href="<?php echo htmlspecialchars($socialLinks['instagram'] ?? '#'); ?>" class="social-link" title="Instagram">
+                            <a href="<?php echo htmlspecialchars($socialLinks['instagram'] ?: INSTAGRAM_URL); ?>" class="social-link" title="Instagram">
                                 <i class="fab fa-instagram"></i>
                             </a>
                         </div>
@@ -186,25 +187,29 @@ include FRONTEND_TEMPLATE_PATH . 'navigation.php';
             </div>
         </div>
     </div>
-    <!-- Contact Form JavaScript -->
+    <!-- container end -->
+
+    <!-- external contact form js script -->
     <script src="/static/base/js/contact.js"></script>
+
 </section>
+<!-- Contact session end -->
 
 <!-- AOS Animation Script -->
 <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    if (typeof AOS !== 'undefined') {
-        AOS.init({
-            duration: 800,
-            once: true,
-            mirror: false
-        });
-        // ensure AOS picks up any DOM changes made by contact.js
-        AOS.refresh();
-    }
-});
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof AOS !== 'undefined') {
+            AOS.init({
+                duration: 800,
+                once: true,
+                mirror: false
+            });
+            // ensure AOS picks up any DOM changes made by contact.js
+            AOS.refresh();
+        }
+    });
 </script>
 
 
-<?php include FRONTEND_TEMPLATE_PATH . "footer.php"; ?>
+<?php include FRONTEND_TEMPLATE_PATH . "footer.php"; // admin footer file ?>

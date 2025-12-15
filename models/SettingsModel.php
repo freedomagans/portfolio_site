@@ -3,11 +3,20 @@
 require_once __DIR__ . '/../config/Database.php';
 require_once __DIR__ . '/BaseModel.php';
 
+/*
+ * Settings Model
+ * Manages application settings stored in the database
+ */
 class Settings extends BaseModel
 {
-    protected $table = 'settings';
-    private $cache = [];
+    protected $table = 'settings'; // Table name for settings
+    private $cache = []; // Cache for settings
 
+    /**
+     * defined constructor for class calls the constructor of BaseModel
+     * and creates the settings table if it doesn't exist
+     * and seeds default settings
+     */
     public function __construct()
     {
         parent::__construct();
@@ -18,7 +27,7 @@ class Settings extends BaseModel
     /**
      * Create settings table if it doesn't exist
      */
-    private function createTableIfNotExists()
+    private function createTableIfNotExists(): void
     {
         $sql = "CREATE TABLE IF NOT EXISTS {$this->table} (
             id INT PRIMARY KEY AUTO_INCREMENT,
@@ -44,7 +53,7 @@ class Settings extends BaseModel
     /**
      * Seed default settings if they don't exist
      */
-    private function seedDefaultSettings()
+    private function seedDefaultSettings(): void
     {
         $defaultSettings = [
             // General Settings
@@ -293,7 +302,7 @@ class Settings extends BaseModel
     /**
      * Insert default setting if it doesn't exist
      */
-    private function insertDefaultSetting($setting)
+    private function insertDefaultSetting($setting): void
     {
         try {
             $stmt = $this->conn->prepare("
@@ -316,7 +325,9 @@ class Settings extends BaseModel
     }
 
     /**
-     * Get a setting value by key
+     * method to get setting value by key from settings table
+     * @param string $key
+     * @return mixed
      */
     public function get($key)
     {
@@ -343,7 +354,10 @@ class Settings extends BaseModel
     }
 
     /**
-     * Set a setting value
+     * method to set setting value by key in settings table
+     * @param string $key
+     * @param mixed $value
+     * @return bool
      */
     public function set($key, $value)
     {
@@ -366,7 +380,8 @@ class Settings extends BaseModel
     }
 
     /**
-     * Get all settings
+     * method to get all settings from settings table
+     * @return array
      */
     public function getAll()
     {
@@ -381,7 +396,8 @@ class Settings extends BaseModel
     }
 
     /**
-     * Get settings grouped by category
+     * method to get all settings grouped by category from settings table
+     * @return array
      */
     public function getAllGrouped()
     {
@@ -403,7 +419,9 @@ class Settings extends BaseModel
     }
 
     /**
-     * Get settings by group
+     * method to get settings by group from settings table
+     * @param string $group
+     * @return array
      */
     public function getByGroup($group)
     {
@@ -418,7 +436,9 @@ class Settings extends BaseModel
     }
 
     /**
-     * Delete a setting
+     * method to delete setting by key from settings table
+     * @param string $key
+     * @return bool
      */
     public function delete($key)
     {
@@ -437,7 +457,8 @@ class Settings extends BaseModel
     }
 
     /**
-     * Clear cache
+     * method to clear settings cache
+     * @return void
      */
     public function clearCache()
     {
@@ -445,7 +466,8 @@ class Settings extends BaseModel
     }
 
     /**
-     * Get public settings only
+     * method to get public settings only from settings table
+     * @return array
      */
     public function getPublicSettings()
     {
@@ -456,6 +478,22 @@ class Settings extends BaseModel
         } catch (PDOException $e) {
             error_log("Error getting public settings: " . $e->getMessage());
             return [];
+        }
+    }
+
+    /**
+     * method to get last updated timestamp from settings table
+     * @return string|null
+     */
+    public function getLastUpdated()
+    {
+        try {
+            $stmt = $this->conn->prepare("SELECT MAX(updated_at) as last_updated FROM {$this->table}");
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC)['last_updated'];
+        } catch (PDOException $e) {
+            error_log("Error getting last updated timestamp: " . $e->getMessage());
+            return null;
         }
     }
 }

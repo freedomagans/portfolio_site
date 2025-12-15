@@ -1,0 +1,176 @@
+/* Prevent horizontal scrollbar globally */
+body {
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+}
+
+/* Custom Styles */
+.hero-section {
+    /* Tech-oriented dark background */
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+    color: #fff;
+    padding: 80px 0;
+    /* Add padding for fixed navbar - typical Bootstrap navbar is ~56px */
+    padding-top: 136px;
+    /* 56px navbar + 80px section padding */
+    margin-top: 0;
+}
+
+.hero-section h1 {
+    font-size: 3rem;
+}
+
+.card-hover:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    transition: all 0.4s ease;
+}
+
+.section-title {
+    position: relative;
+    display: inline-block;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    width: 60px;
+    height: 4px;
+    background-color: #1cc88a;
+    left: 0;
+    bottom: -10px;
+    border-radius: 2px;
+}
+
+.btn-hover:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+/* Ensure containers don't overflow */
+.container,
+.container-fluid {
+    max-width: 100%;
+}
+
+/* Prevent row overflow */
+.row {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+/* Prevent horizontal scrollbar globally */
+body {
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+}
+
+/* Custom Styles */
+.hero-section {
+    /* Tech-oriented dark background */
+    background-image: url('/media/hero.png');
+    color: #fff;
+    padding: 80px 0;
+    /* Add padding for fixed navbar - typical Bootstrap navbar is ~56px */
+    padding-top: 136px;
+    margin-top: 0;
+    min-height: 100vh;
+    /* Full viewport height for better visual */
+    display: flex;
+    align-items: center;
+}
+
+.hero-section h1 {
+    font-size: 3rem;
+}
+
+.hero-image-container {
+    position: relative;
+    padding: 20px;
+}
+
+.hero-image {
+    width: 100%;
+    max-width: 450px;
+    height: auto;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s ease;
+}
+
+.hero-image:hover {
+    transform: scale(1.02);
+}
+
+/* Alternative: Circular profile image */
+.hero-image-circle {
+    width: 100%;
+    max-width: 400px;
+    height: 400px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 5px solid rgba(28, 200, 138, 0.3);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.card-hover:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    transition: all 0.4s ease;
+}
+
+.section-title {
+    position: relative;
+    display: inline-block;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    width: 60px;
+    height: 4px;
+    background-color: #1cc88a;
+    left: 0;
+    bottom: -10px;
+    border-radius: 2px;
+}
+
+.btn-hover:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+/* Ensure containers don't overflow */
+.container,
+.container-fluid {
+    max-width: 100%;
+}
+
+/* Prevent row overflow */
+.row {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 991px) {
+    .hero-section {
+        min-height: unset;
+        padding: 100px 0 60px 0;
+    }
+
+    .hero-section h1 {
+        font-size: 2.5rem;
+    }
+
+    .hero-image,
+    .hero-image-circle {
+        max-width: 300px;
+        margin: 0 auto 30px;
+        display: block;
+    }
+}

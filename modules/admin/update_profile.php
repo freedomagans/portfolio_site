@@ -10,19 +10,19 @@ if (!isset($_SESSION['username'])) {
 $userModel = new User(); // instantiates User instance
 $currentUser = $userModel->getByUsername($_SESSION['username']); // retrieve authenticated user instance
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    /**
-     * if values are submitted from the update profile 
-     * form the values are cleaned up and used to update the user instance 
-     * row;
-     */
 
+/**
+ * if values are submitted from the update profile 
+ * form the values are cleaned up and used to update the user instance 
+ * row;
+ */
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username']); // retrieve username
     $email = trim($_POST['user_email']); // retrieve email
     $password = $currentUser['password']; // set password to existing password
 
     if (!empty($_POST['user_password'])) {
-        // if new password is submitted updated user instance with new password
+        // if new password is submitted update user instance with new password
         $password = password_hash($_POST['user_password'], PASSWORD_DEFAULT);
     }
 
@@ -30,15 +30,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $username,
         $password,
         $email,
-    );// Update user
+    ); // Update user
 
     //set feedback messages
     if ($updated) {
-        $_SESSION['success'] = "Profile updated successfully!";
-        // Update session username if changed
-        $_SESSION['username'] = $username;
+        $_SESSION['success'] = "Profile updated successfully!"; // success feedback
+        $_SESSION['username'] = $username; // Update session username if changed
     } else {
-        $_SESSION['error'] = "Failed to update profile.";
+        $_SESSION['error'] = "Failed to update profile."; // error feedback
     }
 }
 

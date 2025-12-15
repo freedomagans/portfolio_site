@@ -1,13 +1,12 @@
-
 <?php
-include ADMIN_TEMPLATE_PATH . "admin_header.php";
-include ADMIN_TEMPLATE_PATH . "admin_navigation.php";
+include ADMIN_TEMPLATE_PATH . "admin_header.php"; // admin header file
+include ADMIN_TEMPLATE_PATH . "admin_navigation.php"; // admin navigation  file
 
-require_once __DIR__ . '/../../models/NotificationModel.php';
-$notificationModel = new Notification();
+require_once __DIR__ . '/../../models/NotificationModel.php'; // import Notification model
+$notificationModel = new Notification(); // notification instance
 
 // Pagination setup
-$perPage = 10;
+$perPage = ADMIN_ITEMS_PER_PAGE; // perpage constant
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $start = ($page - 1) * $perPage;
 
@@ -15,22 +14,32 @@ $start = ($page - 1) * $perPage;
 $statusFilter = $_GET['status'] ?? null;
 
 // Total notifications for pagination
-$totalNotifications = $notificationModel->countByStatus($statusFilter);
-$totalPages = ($perPage > 0) ? (int)ceil($totalNotifications / $perPage) : 1;
+if ($statusFilter !== null and $statusFilter !== '') {
+    $status = ($statusFilter === 'read' ? 1 : 0);
+    $totalNotifications = $notificationModel->countByStatus($status);
+    $notifications = $notificationModel->getPaginatedByStatus($status, $start, $perPage);
+} else {
+    $totalNotifications = $notificationModel->count();
+    $notifications = $notificationModel->getPaginatedAll($start, $perPage);
+}
 
-// Fetch notifications based on filter and pagination
-$notifications = $notificationModel->getPaginatedByStatus($start, $perPage, $statusFilter);
+
+$totalPages = (int)ceil($totalNotifications / $perPage); // total pages calculation
+
+
 
 // Session feedback messages
-msg_error();
-msg_success();
+msg_error(); // error msg
+msg_success(); // success msg
 ?>
-
+<!-- external notifications css -->
 <link rel="stylesheet" href="/static/admin/css/notifications.css">
 
+<!-- header -->
 <h2 class="mb-4">Notifications</h2>
-<div class="d-flex justify-content-between align-items-center mb-3">
 
+<!-- Filter form and action buttons div -->
+<div class="d-flex justify-content-between align-items-center mb-3">
     <!-- Filter form -->
     <div>
         <form method="GET" class="d-inline" aria-label="Filter notifications">
@@ -42,20 +51,34 @@ msg_success();
             </select>
         </form>
     </div>
+    <!-- Filter form end -->
 
+    <!-- Action buttons -->
     <div>
         <button class="btn btn-sm btn-danger" onclick="triggerDeleteModal('/urls.php?pg=notification_delete&all=true','Delete Notification','Are you sure you want to delete all notifications?')">
             Delete all
         </button>
     </div>
+
+    <div>
+        <button class="btn btn-sm btn-primary" onclick="window.location.href='/urls.php?pg=notification_mark_as_read&all=true'">
+            Mark all as read
+        </button>
+    </div>
+    <!-- Action buttons end -->
+
 </div>
+<!-- Top filter and action buttons end -->
 
 <!-- Page dim element for subtle style when modal is open -->
 <div class="page-overlay-dim" aria-hidden="true"></div>
 
-<!-- Table showing list of notifications -->
+<!-- Table div showing list of notifications -->
 <div class="table-responsive">
+    <!-- Table -->
     <table class="table table-striped table-hover">
+
+        <!-- Table head -->
         <thead class="table-dark">
             <tr>
                 <th>Name</th>
@@ -67,6 +90,8 @@ msg_success();
                 <th colspan="2">Actions</th>
             </tr>
         </thead>
+
+        <!-- Table body -->
         <tbody>
             <?php if (!empty($notifications)) : ?>
                 <?php foreach ($notifications as $notification) :
@@ -93,18 +118,18 @@ msg_success();
                         <td>
                             <!-- View button: uses a single reusable modal; pass data-* attributes -->
                             <button type="button"
-                                    class="btn btn-sm btn-primary view-notification-btn"
-                                    data-notification-id="<?= $id; ?>"
-                                    data-name="<?= $nameAttr; ?>"
-                                    data-email="<?= $emailAttr; ?>"
-                                    data-subject="<?= $subjectAttr; ?>"
-                                    data-message="<?= $messageEncoded; ?>">
+                                class="btn btn-sm btn-primary view-notification-btn"
+                                data-notification-id="<?= $id; ?>"
+                                data-name="<?= $nameAttr; ?>"
+                                data-email="<?= $emailAttr; ?>"
+                                data-subject="<?= $subjectAttr; ?>"
+                                data-message="<?= $messageEncoded; ?>">
                                 View
                             </button>
                         </td>
                         <td>
                             <button class="btn btn-sm btn-danger"
-                                    onclick="triggerDeleteModal('/urls.php?pg=notification_delete&id=<?= $id ?>',
+                                onclick="triggerDeleteModal('/urls.php?pg=notification_delete&id=<?= $id ?>',
                                     'Delete Notification',
                                     'Are you sure you want to delete this notification')">
                                 Delete
@@ -119,6 +144,7 @@ msg_success();
             <?php endif; ?>
         </tbody>
     </table>
+    <!-- Table end -->
 
     <!-- Pagination -->
     <?php if ($totalPages > 1) : ?>
@@ -132,9 +158,12 @@ msg_success();
             </ul>
         </nav>
     <?php endif; ?>
-</div>
+    <!-- Pagination end -->
 
-<!-- REUSABLE VIEW MODAL (single instance, avoid leftover backdrops & stacking problems) -->
+</div>
+<!-- Table div end -->
+
+<!-- REUSABLE VIEW MODAL (single instance, avoid leftover backdrops & stacking problems) notification detail is populated into modal-->
 <div class="modal fade" id="viewNotificationModal" tabindex="-1" aria-labelledby="viewNotificationModalLabel" aria-hidden="true" data-bs-backdrop="true" data-bs-keyboard="true">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
@@ -149,7 +178,6 @@ msg_success();
                 <div id="viewNotificationMessage" class="whitespace-pre-wrap"></div>
             </div>
             <div class="modal-footer">
-                <!-- optional mark-as-read link (keeps original existing action separate) -->
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
@@ -157,93 +185,6 @@ msg_success();
 </div>
 
 <!-- JS: populate & show single modal, robust cleanup for stray backdrops -->
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const viewModalEl = document.getElementById('viewNotificationModal');
-    const viewModal = new bootstrap.Modal(viewModalEl);
-    const viewEmailEl = document.getElementById('viewNotificationEmail');
-    const viewSubjectEl = document.getElementById('viewNotificationSubject');
-    const viewMessageEl = document.getElementById('viewNotificationMessage');
-    const overlayDim = document.querySelector('.page-overlay-dim');
+<script src="/static/admin/js/notifications.js"></script>  
 
-    // helper: escape HTML for safe output then re-insert newlines
-    function escapeHtml(str) {
-        if (typeof str !== 'string') return '';
-        const div = document.createElement('div');
-        div.appendChild(document.createTextNode(str));
-        return div.innerHTML;
-    }
-
-    function nl2brSafe(str) {
-        return escapeHtml(str).replace(/\r\n|\r|\n/g, '<br>');
-    }
-
-    // Click handler for view buttons
-    document.querySelectorAll('.view-notification-btn').forEach(btn => {
-        btn.addEventListener('click', function () {
-            const name = btn.dataset.name || 'Notification';
-            const email = btn.dataset.email || '';
-            const subject = btn.dataset.subject || '';
-            const messageBase64 = btn.dataset.message || '';
-            let message = '';
-            // Decode base64 safely
-            try {
-                message = messageBase64 ? atob(messageBase64) : '';
-            } catch (e) {
-                message = '';
-            }
-
-            // Populate modal
-            viewModalEl.querySelector('.modal-title').textContent = 'Message for ' + name;
-            viewEmailEl.textContent = email;
-            viewSubjectEl.textContent = subject;
-            viewMessageEl.innerHTML = nl2brSafe(message);
-
-            // Show overlay dim (visual only; does not stop clicks beyond default backdrop)
-            overlayDim?.classList.add('d-block');
-
-            // Show modal
-            viewModal.show();
-        });
-    });
-
-    // Clean up after modal hidden
-    viewModalEl.addEventListener('hidden.bs.modal', function () {
-        // Remove overlay dim
-        overlayDim?.classList.remove('d-block');
-
-        // Slight delay and remove leftover backdrops if any
-        setTimeout(() => {
-            // If no other modal is open, tidy up stray backdrops and classes
-            if (!document.querySelector('.modal.show')) {
-                // Remove stray backdrops
-                document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
-                // Ensure bootstrap modal-open class removed if needed
-                document.body.classList.remove('modal-open');
-            }
-        }, 50);
-    });
-
-    // If any stray backdrop remains (rare), click on it should remove it
-    document.addEventListener('click', function () {
-        if (!document.querySelector('.modal.show')) {
-            document.querySelectorAll('.modal-backdrop').forEach(b => {
-                b.remove();
-            });
-        }
-    });
-
-    // Accessibility fallback: ESC hide fallback (Bootstrap handles this but keep as defensive)
-    document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') {
-            const openModal = document.querySelector('.modal.show');
-            if (openModal) {
-                const instance = bootstrap.Modal.getInstance(openModal);
-                if (instance) instance.hide();
-            }
-        }
-    });
-});
-</script>
-
-<?php include ADMIN_TEMPLATE_PATH . "admin_footer.php"; ?>
+<?php include ADMIN_TEMPLATE_PATH . "admin_footer.php"; // admin footer file ?>

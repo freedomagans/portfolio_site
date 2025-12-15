@@ -1,12 +1,12 @@
 <?php
 // ===============================================
-// ADMIN DASHBOARD — Real Analytics Version
+// ADMIN DASHBOARD
 // ===============================================
 
-include ADMIN_TEMPLATE_PATH . "admin_header.php";
-include ADMIN_TEMPLATE_PATH . "admin_navigation.php";
+include ADMIN_TEMPLATE_PATH . "admin_header.php"; // admin header file 
+include ADMIN_TEMPLATE_PATH . "admin_navigation.php"; // admin navigation  file
 
-// Load models
+// import models
 require_once __DIR__ . '/../../models/ProjectModel.php';
 require_once __DIR__ . '/../../models/ProjectViewModel.php';
 require_once __DIR__ . '/../../models/ProjectLikeModel.php';
@@ -26,7 +26,7 @@ $totalViews = $projectViewModel->count();
 $totalLikes = $projectLikeModel->count();
 $approvedComments = $commentModel->countByStatus(1);
 $pendingComments = $commentModel->countByStatus(0);
-$totalComments = $approvedComments + $pendingComments;
+$totalComments = $commentModel->count();
 $totalMessages = $notificationModel->count();
 $unreadMessages = $notificationModel->unreadCount();
 
@@ -387,10 +387,10 @@ $messagesChartData = fillMonthlyData($messagesPerMonth);
         <div class="col-xl-4 col-lg-5">
             <div class="profile-card">
                 <div class="card-body text-center p-4">
-                    <img src="https://ui-avatars.com/api/?name=<?= urlencode($_SESSION['username'] ?? 'Admin') ?>&size=80&background=667eea&color=fff&bold=true" 
+                    <img src="https://ui-avatars.com/api/?name=<?= urlencode($_SESSION['username'] ?: 'Admin') ?>&size=80&background=667eea&color=fff&bold=true" 
                          alt="Profile" 
                          class="profile-avatar mb-3">
-                    <h5 class="profile-name"><?= htmlspecialchars($_SESSION['username'] ?? 'Admin') ?></h5>
+                    <h5 class="profile-name"><?= htmlspecialchars($_SESSION['username'] ?: 'Admin') ?></h5>
                     <p class="profile-role">Administrator</p>
                 </div>
                 <div class="profile-stats">
@@ -447,14 +447,14 @@ $messagesChartData = fillMonthlyData($messagesPerMonth);
                                     </div>
                                     <div class="widget-item-content">
                                         <div class="widget-item-title">
-                                            <?= htmlspecialchars($project['title'] ?? 'Untitled') ?>
+                                            <?= htmlspecialchars($project['title'] ?: 'Untitled') ?>
                                         </div>
                                         <div class="widget-item-meta">
                                             <i class="fas fa-clock"></i>
                                             <?= date('M d, Y', strtotime($project['created_at'])) ?>
                                         </div>
                                     </div>
-                                    <?php if ((int)($project['is_published'] ?? 1) === 1): ?>
+                                    <?php if ((int)($project['is_published'] ?: 1) === 1): ?>
                                         <span class="widget-item-badge bg-success text-white">
                                             Published
                                         </span>
@@ -505,7 +505,7 @@ $messagesChartData = fillMonthlyData($messagesPerMonth);
                                     </div>
                                     <div class="widget-item-content">
                                         <div class="widget-item-title">
-                                            <?= htmlspecialchars($comment['name'] ?? 'Anonymous') ?>
+                                            <?= htmlspecialchars($comment['name'] ?: 'Anonymous') ?>
                                         </div>
                                         <div class="widget-item-meta">
                                             <i class="fas fa-clock"></i>
@@ -559,7 +559,7 @@ $messagesChartData = fillMonthlyData($messagesPerMonth);
                                     </div>
                                     <div class="widget-item-content">
                                         <div class="widget-item-title">
-                                            <?= htmlspecialchars($notification['name'] ?? 'Anonymous') ?>
+                                            <?= htmlspecialchars($notification['name'] ?: 'Anonymous') ?>
                                         </div>
                                         <div class="widget-item-meta">
                                             <i class="fas fa-clock"></i>
@@ -649,7 +649,7 @@ window.chartData = {
 </script>
 
 <!-- Dashboard JavaScript -->
-<script src="/static/admin/js/dashboard.js"></script>
+<script src="/static/admin/js/dashboard.js"></script> 
 
-<?php include ADMIN_TEMPLATE_PATH . "admin_footer.php"; ?>
+<?php include ADMIN_TEMPLATE_PATH . "admin_footer.php";  //footer file ?>
 
